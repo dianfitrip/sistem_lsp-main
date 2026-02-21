@@ -21,6 +21,7 @@ import JadwalUji from "./pages/admin/JadwalUji";
 import Pengaduan from "./pages/admin/Pengaduan";
 import Banding from "./pages/admin/Banding";
 import DokumenMutu from "./pages/admin/DokumenMutu";
+import NotifikasiAdmin from "./pages/admin/Notifikasi"; // Perbaikan path import
 
 function App() {
 
@@ -82,12 +83,14 @@ function App() {
           {/* Menu DAFTAR ASESOR */}
           <Route path="asesor" element={<Asesor />} />
 
-          {/* Menu JADWAL UJI KOMPETENSI [BARU] */}
+          {/* Menu JADWAL UJI KOMPETENSI */}
           <Route path="jadwal/uji-kompetensi" element={<JadwalUji />} />
 
+          {/* Menu Log & Layanan */}
           <Route path="pengaduan" element={<Pengaduan />} />
           <Route path="banding" element={<Banding />} />
           <Route path="dokumen-mutu" element={<DokumenMutu />} />
+          <Route path="notifikasi" element={<NotifikasiAdmin />} />
 
         </Route>
 
@@ -105,8 +108,8 @@ function App() {
         {/* --- 404 NOT FOUND --- */}
         <Route path="*" element={
           <div style={{ textAlign: "center", marginTop: "50px" }}>
-            <h1>404</h1>
-            <p>Halaman tidak ditemukan.</p>
+            <h1 className="text-4xl font-bold">404</h1>
+            <p className="text-gray-600 mt-2">Halaman tidak ditemukan.</p>
           </div>
         } />
 

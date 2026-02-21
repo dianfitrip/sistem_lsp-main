@@ -217,7 +217,7 @@ const Sidebar = () => {
         
         <button className={`nav-item ${isActive('/admin/notifikasi') ? 'active' : ''}`} onClick={() => handleNav('/admin/notifikasi')}>
           <div className="nav-icon"><FaCommentDots /></div>
-          <span className="nav-label">SMS / Notifikasi</span>
+          <span className="nav-label">Notifikasi</span>
         </button>
 
         <button className={`nav-item ${isActive('/admin/website') ? 'active' : ''}`} onClick={() => handleNav('/admin/website')}>

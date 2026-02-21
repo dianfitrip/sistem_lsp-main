@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import Sidebar from './Sidebar';
-import './AdminDashboard.css';
+import './adminstyles/AdminDashboard.css';
 import {
   FaLayerGroup,
   FaUserTie,

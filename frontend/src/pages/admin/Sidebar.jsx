@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import "./Sidebar.css";
+import "./adminstyles/Sidebar.css";
 import {
   FaHome, FaBullhorn, FaGavel, FaChartBar, FaUniversity, FaBook, FaAward, 
   FaLayerGroup, FaMoneyBillWave, FaCalendarAlt, FaBuilding, FaUserGraduate, 

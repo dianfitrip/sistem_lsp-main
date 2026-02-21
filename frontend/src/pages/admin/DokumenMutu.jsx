@@ -5,7 +5,7 @@ import {
   Search, Plus, Eye, Edit2, Trash2, X, Save, FileText, 
   Filter, Download, Loader2, ChevronLeft, ChevronRight 
 } from 'lucide-react';
-import './DokumenMutu.css'; 
+import './adminstyles/DokumenMutu.css'; 
 
 const DokumenMutu = () => {
   // --- STATE ---

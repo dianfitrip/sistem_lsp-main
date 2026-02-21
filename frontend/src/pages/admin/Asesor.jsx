@@ -5,7 +5,7 @@ import {
   Search, Plus, Eye, Edit2, Trash2, X, Save, Download, Upload,
   User, Loader2, ChevronLeft, ChevronRight, Camera
 } from 'lucide-react';
-import './Asesor.css'; 
+import './adminstyles/Asesor.css'; 
 
 const Asesor = () => {
   // --- STATE ---

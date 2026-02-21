@@ -7,7 +7,7 @@ import {
   MapPin, CheckCircle, XCircle, User, Phone, Mail, Calendar,
   Building2, FileText, Loader2, AlertCircle, ChevronLeft, ChevronRight
 } from 'lucide-react';
-import './TempatUji.css';
+import './adminstyles/TempatUji.css';
 
 const TempatUji = () => {
   const [data, setData] = useState([]);

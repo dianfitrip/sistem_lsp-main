@@ -65,3 +65,45 @@ exports.logout = async (req, res) => {
     message: "Logout berhasil (client hapus token)"
   });
 };
+
+
+// Tambahkan di backend/src/controllers/auth/auth.controller.js
+
+exports.register = async (req, res) => {
+  try {
+    const { username, password, email, id_role, no_hp } = req.body;
+
+    // 1. Cek apakah username sudah ada
+    const existingUser = await User.findOne({ where: { username } });
+    if (existingUser) {
+      return res.status(400).json({ message: "Username sudah digunakan" });
+    }
+
+    // 2. Hash Password
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(password, salt);
+
+    // 3. Buat User Baru
+    const newUser = await User.create({
+      username,
+      password_hash: passwordHash, // Simpan password yang sudah di-hash
+      email,
+      id_role, // Pastikan ID Role ini sudah ada di tabel 'roles'
+      no_hp,
+      status_user: 'aktif'
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "User Admin berhasil dibuat",
+      data: {
+        id: newUser.id_user,
+        username: newUser.username
+      }
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Gagal membuat user", error: error.message });
+  }
+};

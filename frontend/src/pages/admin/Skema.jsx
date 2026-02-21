@@ -6,7 +6,7 @@ import {
   Search, Plus, Eye, Edit2, Trash2, X, Save, Download, Upload,
   FileText, CheckCircle, XCircle, Loader2, ChevronLeft, ChevronRight
 } from 'lucide-react';
-import './Skema.css'; 
+import './adminstyles/Skema.css'; 
 
 const Skema = () => {
   // --- STATE ---

@@ -6,7 +6,7 @@ import {
   Search, Plus, Eye, Edit2, Trash2, CheckCircle, X, Save, 
   User, Mail, Phone, MapPin, Briefcase, Calendar, Layers 
 } from 'lucide-react';
-import './VerifikasiPendaftaran.css';
+import './adminstyles/VerifikasiPendaftaran.css';
 
 
 const VerifikasiPendaftaran = () => {

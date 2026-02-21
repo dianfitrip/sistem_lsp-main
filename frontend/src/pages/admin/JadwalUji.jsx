@@ -5,7 +5,7 @@ import {
   Search, Plus, Eye, Edit2, Trash2, X, Save, Download,
   Calendar, Loader2, ChevronLeft, ChevronRight, Clock
 } from 'lucide-react';
-import './JadwalUji.css'; 
+import './adminstyles/JadwalUji.css'; 
 
 const JadwalUji = () => {
   // --- STATE ---

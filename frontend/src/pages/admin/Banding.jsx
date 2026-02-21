@@ -5,7 +5,7 @@ import {
   Search, Eye, Trash2, X, Save, 
   Gavel, User, FileText, Calendar, CheckCircle, XCircle, Clock, Loader2, ChevronLeft, ChevronRight
 } from 'lucide-react';
-import './Banding.css'; 
+import './adminstyles/Banding.css'; 
 
 const Banding = () => {
   // --- STATE ---

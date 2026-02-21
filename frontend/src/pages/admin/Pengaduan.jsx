@@ -5,7 +5,7 @@ import {
   Search, Eye, Trash2, X, Save, 
   MessageSquare, User, Calendar, Mail, Phone, Loader2, ChevronLeft, ChevronRight
 } from 'lucide-react';
-import './Pengaduan.css'; 
+import './adminstyles/Pengaduan.css'; 
 
 const Pengaduan = () => {
   // --- STATE ---

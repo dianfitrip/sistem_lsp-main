@@ -8,8 +8,9 @@ import "./LoginAdmin.css";
 const LoginAdmin = () => {
   const navigate = useNavigate();
 
+  // 1. UBAH STATE: Ganti 'email' menjadi 'username'
   const [formData, setFormData] = useState({
-    email: "",
+    username: "", 
     password: "",
   });
 
@@ -17,6 +18,7 @@ const LoginAdmin = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e) => {
+    // Ini akan otomatis mengisi formData.username jika input name="username"
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -25,19 +27,17 @@ const LoginAdmin = () => {
     setIsLoading(true);
 
     try {
+      // Sekarang yang dikirim adalah { username: "...", password: "..." }
+      // Ini COCOK dengan backend asli Anda yang meminta req.body.username
       const response = await api.post("/auth/login", formData);
       const resData = response.data;
 
-      console.log("Respon Login Server:", resData); // Cek ini di Console Browser (F12)
+      console.log("Respon Login Server:", resData);
 
-      // --- PERBAIKAN UTAMA DI SINI ---
-      // Kita cari token di 'resData.token' ATAU 'resData.data.token'
-      // Ini mengantisipasi struktur respon backend yang berbeda-beda
       const token = resData.token || (resData.data && resData.data.token);
       const user = resData.user || (resData.data && resData.data.user);
 
       if (token) { 
-        // Simpan Token yang BENAR (Bukan undefined)
         localStorage.setItem("token", token);
         localStorage.setItem("user", JSON.stringify(user));
 
@@ -52,7 +52,6 @@ const LoginAdmin = () => {
         });
 
       } else {
-        // Jika token tetap tidak ketemu, tampilkan pesan error dari server
         throw new Error(resData.message || "Token tidak ditemukan dalam respon server");
       }
 
@@ -82,14 +81,15 @@ const LoginAdmin = () => {
 
         <form onSubmit={handleSubmit} className="login-admin-form">
           <div className="form-group">
-            <label>Email Address</label>
+            {/* 2. UBAH LABEL & INPUT */}
+            <label>Username</label>
             <div className="input-wrapper">
               <FaUserShield className="input-icon" />
               <input
                 type="text" 
-                name="email"
-                placeholder="admin@lsp.com"
-                value={formData.email}
+                name="username" // PENTING: name harus 'username'
+                placeholder="Masukkan username admin"
+                value={formData.username} // Bind ke state username
                 onChange={handleChange}
                 required
               />

@@ -1,77 +1,48 @@
 import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
-import api from "../../services/api";
+import api from "../../services/api"; 
 import { 
-  Search, Plus, Eye, Edit2, Trash2, X, Save, 
+  Search, Plus, Eye, EyeOff, Edit2, Trash2, X, Save, 
   User, Loader2, ChevronLeft, ChevronRight, MapPin, 
   Lock, BookOpen, Briefcase, Key
 } from 'lucide-react';
 import './adminstyles/Asesor.css'; 
 
-// URL API Wilayah Indonesia (Sesuai file wilayah.controller.js)
-const WILAYAH_API_BASE_URL = "https://emsifa.github.io/api-wilayah-indonesia/api";
-
 const Asesor = () => {
-  // --- STATE DATA UTAMA ---
+  // --- STATE UTAMA ---
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState(''); 
-  
   const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, totalPages: 1 });
 
-  // --- STATE WILAYAH (Untuk Opsi Dropdown) ---
+  // --- STATE KHUSUS UI ---
+  const [showPassword, setShowPassword] = useState(false); // <--- State untuk fitur mata
+
+  // --- STATE WILAYAH ---
   const [provinsiList, setProvinsiList] = useState([]);
   const [kotaList, setKotaList] = useState([]);
   const [kecamatanList, setKecamatanList] = useState([]);
   const [kelurahanList, setKelurahanList] = useState([]);
 
-  // --- STATE ID WILAYAH (PENTING: Untuk Trigger API selanjutnya) ---
-  // Kita pisahkan ID ini dari formData karena formData menyimpan "Nama" (String)
+  // --- STATE ID WILAYAH ---
   const [selectedWilayahId, setSelectedWilayahId] = useState({
-    provinsi: '',
-    kota: '',
-    kecamatan: ''
+    provinsi: '', kota: '', kecamatan: ''
   });
 
   // --- FORM STATE ---
   const [formData, setFormData] = useState({
-    // User Account
-    username: '',
-    password: '',
-
-    // Profile Data
-    nik: '', 
-    gelar_depan: '', 
-    nama_lengkap: '', 
-    gelar_belakang: '', 
-    jenis_kelamin: 'laki-laki', 
-    tempat_lahir: '',
-    tanggal_lahir: '',
-    kebangsaan: 'Indonesia',
-
-    pendidikan_terakhir: '',
-    tahun_lulus: '',
-    institut_asal: '',
-
-    alamat: '',
-    rt: '',
-    rw: '',
-    provinsi: '', // Disimpan sebagai String (Nama)
-    kota: '',     // Disimpan sebagai String (Nama)
-    kecamatan: '',// Disimpan sebagai String (Nama)
-    kelurahan: '',// Disimpan sebagai String (Nama)
-    kode_pos: '',
-
-    bidang_keahlian: '',
-    no_reg_asesor: '',
-    no_lisensi: '',
-    masa_berlaku: '',
-    status_asesor: 'aktif'
+    username: '', password: '',
+    nik: '', gelar_depan: '', nama_lengkap: '', gelar_belakang: '',
+    jenis_kelamin: 'laki-laki', tempat_lahir: '', tanggal_lahir: '', kebangsaan: 'Indonesia',
+    pendidikan_terakhir: '', tahun_lulus: '', institut_asal: '',
+    alamat: '', rt: '', rw: '', 
+    provinsi: '', kota: '', kecamatan: '', kelurahan: '', kode_pos: '',
+    bidang_keahlian: '', no_reg_asesor: '', no_lisensi: '', masa_berlaku: '', status_asesor: 'aktif'
   });
 
-  // --- 1. FETCH DATA ASESOR DARI BACKEND ---
+  // --- 1. FETCH DATA ASESOR ---
   const fetchData = async (page = 1) => {
     setLoading(true);
     try {
@@ -79,13 +50,15 @@ const Asesor = () => {
         params: { page, limit: pagination.limit, search: searchTerm }
       });
       const result = response.data.data; 
-      
       const rows = result.rows || result;
-      const total = result.totalItems || result.length || 0;
-      const pages = result.totalPages || 1;
-
+      
       setData(rows); 
-      setPagination(prev => ({ ...prev, page, total, totalPages: pages }));
+      setPagination(prev => ({
+        ...prev,
+        page: result.currentPage || page,
+        total: result.totalItems || 0,
+        totalPages: result.totalPages || 1
+      }));
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -95,90 +68,59 @@ const Asesor = () => {
 
   useEffect(() => { fetchData(pagination.page); }, [pagination.page]);
 
-  // --- 2. LOGIKA API WILAYAH (CASCADING) ---
-  
-  // A. Ambil Provinsi saat Modal Dibuka
+  // --- 2. LOGIKA WILAYAH (SESUAI ROUTE ANDA) ---
   useEffect(() => {
     if (showModal) {
-      // Reset list saat modal buka baru
       if (modalType === 'create') {
-        setKotaList([]);
-        setKecamatanList([]);
-        setKelurahanList([]);
+        setKotaList([]); setKecamatanList([]); setKelurahanList([]);
       }
-      
-      fetch(`${WILAYAH_API_BASE_URL}/provinces.json`)
-        .then(res => res.json())
-        .then(data => {
-          setProvinsiList(data);
-        })
+      api.get('/public/provinsi')
+        .then(res => setProvinsiList(res.data))
         .catch(err => console.error("Gagal ambil provinsi:", err));
     }
   }, [showModal]);
 
-  // B. Ambil Kota saat ID Provinsi Berubah
   useEffect(() => {
     if (selectedWilayahId.provinsi) {
-      fetch(`${WILAYAH_API_BASE_URL}/regencies/${selectedWilayahId.provinsi}.json`)
-        .then(res => res.json())
-        .then(data => setKotaList(data))
+      api.get(`/public/kota/${selectedWilayahId.provinsi}`)
+        .then(res => setKotaList(res.data))
         .catch(err => console.error("Gagal ambil kota:", err));
-    } else {
-      setKotaList([]);
-    }
+    } else { setKotaList([]); }
   }, [selectedWilayahId.provinsi]);
 
-  // C. Ambil Kecamatan saat ID Kota Berubah
   useEffect(() => {
     if (selectedWilayahId.kota) {
-      fetch(`${WILAYAH_API_BASE_URL}/districts/${selectedWilayahId.kota}.json`)
-        .then(res => res.json())
-        .then(data => setKecamatanList(data))
+      api.get(`/public/kecamatan/${selectedWilayahId.kota}`)
+        .then(res => setKecamatanList(res.data))
         .catch(err => console.error("Gagal ambil kecamatan:", err));
-    } else {
-      setKecamatanList([]);
-    }
+    } else { setKecamatanList([]); }
   }, [selectedWilayahId.kota]);
 
-  // D. Ambil Kelurahan saat ID Kecamatan Berubah
   useEffect(() => {
     if (selectedWilayahId.kecamatan) {
-      fetch(`${WILAYAH_API_BASE_URL}/villages/${selectedWilayahId.kecamatan}.json`)
-        .then(res => res.json())
-        .then(data => setKelurahanList(data))
+      api.get(`/public/kelurahan/${selectedWilayahId.kecamatan}`)
+        .then(res => setKelurahanList(res.data))
         .catch(err => console.error("Gagal ambil kelurahan:", err));
-    } else {
-      setKelurahanList([]);
-    }
+    } else { setKelurahanList([]); }
   }, [selectedWilayahId.kecamatan]);
 
-
   // --- HANDLERS ---
-  const handleSearch = (e) => { 
-    e.preventDefault(); 
-    setPagination(prev => ({ ...prev, page: 1 })); 
-    fetchData(1); 
-  };
+  const handleSearch = (e) => { e.preventDefault(); setPagination(prev => ({ ...prev, page: 1 })); fetchData(1); };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // Handler Khusus Wilayah: Simpan NAMA ke DB, Simpan ID ke State untuk API
   const handleWilayahChange = (e, level) => {
     const selectedId = e.target.value;
     const selectedIndex = e.target.selectedIndex;
-    // Ambil teks (Nama Wilayah) dari option yang dipilih
-    const selectedName = e.target.options[selectedIndex].text;
+    const selectedName = e.target.options[selectedIndex] ? e.target.options[selectedIndex].text : '';
 
-    // 1. Update Form Data (Simpan Nama)
     setFormData(prev => ({ ...prev, [level]: selectedName }));
 
-    // 2. Update ID & Reset Anak Wilayah
     if (level === 'provinsi') {
       setSelectedWilayahId({ provinsi: selectedId, kota: '', kecamatan: '' });
-      // Reset form bawahnya
       setFormData(prev => ({ ...prev, provinsi: selectedName, kota: '', kecamatan: '', kelurahan: '' }));
     } else if (level === 'kota') {
       setSelectedWilayahId(prev => ({ ...prev, kota: selectedId, kecamatan: '' }));
@@ -201,6 +143,7 @@ const Asesor = () => {
       bidang_keahlian: '', no_reg_asesor: '', no_lisensi: '', masa_berlaku: '', status_asesor: 'aktif'
     });
     setSelectedWilayahId({ provinsi: '', kota: '', kecamatan: '' });
+    setShowPassword(false); // Reset status password
   };
 
   const handleCreate = () => {
@@ -211,10 +154,7 @@ const Asesor = () => {
 
   const handleEdit = (item) => {
     setModalType('edit');
-    // Load data item ke form
     setFormData({ ...item, password: '' });
-    // Note: Untuk edit, dropdown wilayah tidak akan otomatis ter-select ID-nya 
-    // karena kita hanya menyimpan Nama di database. User harus pilih ulang jika ingin ganti alamat.
     setShowModal(true);
   };
 
@@ -226,7 +166,7 @@ const Asesor = () => {
 
   const handleDelete = async (id) => {
     const result = await Swal.fire({
-      title: 'Hapus Asesor?', text: "Data user & profil akan dihapus permanen.", icon: 'warning',
+      title: 'Hapus Asesor?', text: "Data akan dihapus permanen.", icon: 'warning',
       showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Ya, Hapus!'
     });
     if (result.isConfirmed) {
@@ -245,12 +185,12 @@ const Asesor = () => {
     try {
       if (modalType === 'create') {
         await api.post('/admin/asesor', formData);
-        Swal.fire('Berhasil!', 'Asesor baru berhasil ditambahkan.', 'success');
+        Swal.fire('Berhasil!', 'Asesor berhasil ditambahkan.', 'success');
       } else {
         const updatePayload = { ...formData };
         if (!updatePayload.password) delete updatePayload.password;
         await api.put(`/admin/asesor/${formData.id_asesor || formData.id_user}`, updatePayload);
-        Swal.fire('Berhasil!', 'Data asesor diperbarui.', 'success');
+        Swal.fire('Berhasil!', 'Data diperbarui.', 'success');
       }
       setShowModal(false);
       fetchData(pagination.page);
@@ -264,30 +204,26 @@ const Asesor = () => {
 
   return (
     <div className="asesor-container">
-      {/* HEADER & FILTER SECTION */}
+      {/* HEADER */}
       <div className="header-section">
         <div className="title-box">
           <h2>Manajemen Asesor</h2>
-          <p>Kelola data akun dan profil asesor LSP.</p>
+          <p>Kelola data akun dan profil asesor.</p>
         </div>
         <button className="btn-create" onClick={handleCreate}>
           <Plus size={18} /> Tambah Asesor
         </button>
       </div>
 
+      {/* SEARCH */}
       <div className="filter-section">
         <form onSubmit={handleSearch} className="search-box">
           <Search className="search-icon" size={20} />
-          <input 
-            type="text" 
-            placeholder="Cari Nama, NIK, atau Username..." 
-            value={searchTerm} 
-            onChange={(e) => setSearchTerm(e.target.value)} 
-          />
+          <input type="text" placeholder="Cari Nama / NIK..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
         </form>
       </div>
 
-      {/* TABLE SECTION */}
+      {/* TABLE */}
       <div className="table-container">
         {loading ? <div className="loading-state"><Loader2 className="animate-spin"/> Memuat...</div> : (
           <table className="custom-table">
@@ -346,7 +282,7 @@ const Asesor = () => {
         <div className="modal-overlay">
           <div className="modal-content large">
             <div className="modal-header">
-              <h3>{modalType === 'create' ? 'Tambah Asesor Baru' : modalType === 'edit' ? 'Edit Data Asesor' : 'Detail Asesor'}</h3>
+              <h3>{modalType === 'create' ? 'Tambah Asesor Baru' : modalType === 'edit' ? 'Edit Asesor' : 'Detail Asesor'}</h3>
               <button className="close-btn" onClick={() => setShowModal(false)}><X size={20}/></button>
             </div>
             
@@ -365,11 +301,37 @@ const Asesor = () => {
                           <input type="text" name="username" className="pl-8" value={formData.username} onChange={handleInputChange} disabled={modalType === 'edit'} required placeholder="Buat username unik"/>
                         </div>
                       </div>
+                      
+                      {/* --- INPUT PASSWORD DENGAN FITUR MATA --- */}
                       <div className="form-group">
                         <label>Password {modalType === 'create' && <span className="text-red-500">*</span>}</label>
-                        <div className="input-with-icon">
+                        <div className="input-with-icon" style={{ position: 'relative' }}>
                           <Key size={14} className="input-icon-left"/>
-                          <input type="password" name="password" className="pl-8" value={formData.password} onChange={handleInputChange} required={modalType === 'create'} placeholder={modalType === 'create' ? "Password akun" : "Kosongkan jika tidak diganti"}/>
+                          <input 
+                            type={showPassword ? "text" : "password"} 
+                            name="password" 
+                            className="pl-8 pr-10" /* pr-10 untuk memberi ruang ikon mata */
+                            value={formData.password} 
+                            onChange={handleInputChange} 
+                            required={modalType === 'create'} 
+                            placeholder={modalType === 'create' ? "Password akun" : "Kosongkan jika tidak diganti"}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            style={{ 
+                              position: 'absolute', 
+                              right: '10px', 
+                              top: '50%', 
+                              transform: 'translateY(-50%)', 
+                              background: 'transparent', 
+                              border: 'none', 
+                              cursor: 'pointer',
+                              color: '#94a3b8'
+                            }}
+                          >
+                            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -411,7 +373,7 @@ const Asesor = () => {
                   <div className="form-group full-width"><label>Institut Asal</label><input name="institut_asal" value={formData.institut_asal} onChange={handleInputChange} disabled={isDetailMode}/></div>
                 </div>
 
-                {/* 4. ALAMAT (WILAYAH API) */}
+                {/* 4. ALAMAT */}
                 <h4 className="section-title"><MapPin size={16} /> Alamat Domisili</h4>
                 <div className="form-row">
                    <div className="form-group full-width"><label>Jalan / Nama Tempat</label><textarea name="alamat" value={formData.alamat} onChange={handleInputChange} disabled={isDetailMode} rows="2"/></div>
@@ -426,34 +388,19 @@ const Asesor = () => {
                 <div className="form-row">
                     <div className="form-group">
                       <label>Provinsi</label>
-                      {isDetailMode ? (
-                        <input type="text" value={formData.provinsi} disabled />
-                      ) : (
-                        <select 
-                          onChange={(e) => handleWilayahChange(e, 'provinsi')} 
-                          value={selectedWilayahId.provinsi}
-                        >
-                          <option value="">Pilih Provinsi</option>
-                          {provinsiList.map(p => (
-                            <option key={p.id} value={p.id}>{p.name}</option>
-                          ))}
+                      {isDetailMode ? <input value={formData.provinsi} disabled /> : (
+                        <select onChange={(e) => handleWilayahChange(e, 'provinsi')} value={selectedWilayahId.provinsi}>
+                          <option value="">-- Pilih Provinsi --</option>
+                          {provinsiList.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                         </select>
                       )}
                     </div>
                     <div className="form-group">
                       <label>Kota/Kabupaten</label>
-                      {isDetailMode ? (
-                        <input type="text" value={formData.kota} disabled />
-                      ) : (
-                        <select 
-                          onChange={(e) => handleWilayahChange(e, 'kota')} 
-                          value={selectedWilayahId.kota}
-                          disabled={!selectedWilayahId.provinsi} // Disable jika provinsi belum dipilih
-                        >
-                          <option value="">Pilih Kota/Kab</option>
-                          {kotaList.map(k => (
-                            <option key={k.id} value={k.id}>{k.name}</option>
-                          ))}
+                      {isDetailMode ? <input value={formData.kota} disabled /> : (
+                        <select onChange={(e) => handleWilayahChange(e, 'kota')} value={selectedWilayahId.kota} disabled={!selectedWilayahId.provinsi}>
+                          <option value="">-- Pilih Kota/Kab --</option>
+                          {kotaList.map(k => <option key={k.id} value={k.id}>{k.name}</option>)}
                         </select>
                       )}
                     </div>
@@ -461,34 +408,19 @@ const Asesor = () => {
                 <div className="form-row">
                     <div className="form-group">
                       <label>Kecamatan</label>
-                      {isDetailMode ? (
-                        <input type="text" value={formData.kecamatan} disabled />
-                      ) : (
-                        <select 
-                          onChange={(e) => handleWilayahChange(e, 'kecamatan')} 
-                          value={selectedWilayahId.kecamatan}
-                          disabled={!selectedWilayahId.kota} // Disable jika kota belum dipilih
-                        >
-                          <option value="">Pilih Kecamatan</option>
-                          {kecamatanList.map(k => (
-                            <option key={k.id} value={k.id}>{k.name}</option>
-                          ))}
+                      {isDetailMode ? <input value={formData.kecamatan} disabled /> : (
+                        <select onChange={(e) => handleWilayahChange(e, 'kecamatan')} value={selectedWilayahId.kecamatan} disabled={!selectedWilayahId.kota}>
+                          <option value="">-- Pilih Kecamatan --</option>
+                          {kecamatanList.map(k => <option key={k.id} value={k.id}>{k.name}</option>)}
                         </select>
                       )}
                     </div>
                     <div className="form-group">
                       <label>Kelurahan/Desa</label>
-                      {isDetailMode ? (
-                        <input type="text" value={formData.kelurahan} disabled />
-                      ) : (
-                        <select 
-                          onChange={(e) => handleWilayahChange(e, 'kelurahan')} 
-                          disabled={!selectedWilayahId.kecamatan} // Disable jika kecamatan belum dipilih
-                        >
-                          <option value="">Pilih Kelurahan</option>
-                          {kelurahanList.map(k => (
-                            <option key={k.id} value={k.id}>{k.name}</option>
-                          ))}
+                      {isDetailMode ? <input value={formData.kelurahan} disabled /> : (
+                        <select onChange={(e) => handleWilayahChange(e, 'kelurahan')} disabled={!selectedWilayahId.kecamatan}>
+                          <option value="">-- Pilih Kelurahan --</option>
+                          {kelurahanList.map(k => <option key={k.id} value={k.id}>{k.name}</option>)}
                         </select>
                       )}
                     </div>

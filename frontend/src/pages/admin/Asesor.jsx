@@ -17,29 +17,49 @@ const Asesor = () => {
   const [modalType, setModalType] = useState(''); 
   const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, totalPages: 1 });
 
-  // --- STATE KHUSUS UI ---
-  const [showPassword, setShowPassword] = useState(false); // <--- State untuk fitur mata
+  // --- FITUR UI ---
+  const [showPassword, setShowPassword] = useState(false);
 
   // --- STATE WILAYAH ---
   const [provinsiList, setProvinsiList] = useState([]);
   const [kotaList, setKotaList] = useState([]);
   const [kecamatanList, setKecamatanList] = useState([]);
   const [kelurahanList, setKelurahanList] = useState([]);
-
-  // --- STATE ID WILAYAH ---
-  const [selectedWilayahId, setSelectedWilayahId] = useState({
-    provinsi: '', kota: '', kecamatan: ''
-  });
+  const [selectedWilayahId, setSelectedWilayahId] = useState({ provinsi: '', kota: '', kecamatan: '' });
 
   // --- FORM STATE ---
   const [formData, setFormData] = useState({
-    username: '', password: '',
-    nik: '', gelar_depan: '', nama_lengkap: '', gelar_belakang: '',
-    jenis_kelamin: 'laki-laki', tempat_lahir: '', tanggal_lahir: '', kebangsaan: 'Indonesia',
-    pendidikan_terakhir: '', tahun_lulus: '', institut_asal: '',
-    alamat: '', rt: '', rw: '', 
-    provinsi: '', kota: '', kecamatan: '', kelurahan: '', kode_pos: '',
-    bidang_keahlian: '', no_reg_asesor: '', no_lisensi: '', masa_berlaku: '', status_asesor: 'aktif'
+    // Fields untuk Tabel User (Dibutuhkan Backend)
+    username: '', 
+    password: '',
+    email: '',    // PENTING: allowNull false di tabel users
+    no_hp: '',    // PENTING: allowNull false di tabel users
+
+    // Fields untuk Tabel Profile Asesor (profileAsesor.model.js)
+    nik: '', 
+    gelar_depan: '', 
+    nama_lengkap: '', 
+    gelar_belakang: '', 
+    jenis_kelamin: 'laki-laki', 
+    tempat_lahir: '',
+    tanggal_lahir: '',
+    kebangsaan: 'Indonesia',
+    pendidikan_terakhir: '',
+    tahun_lulus: '',
+    institut_asal: '',
+    alamat: '',
+    rt: '',
+    rw: '',
+    provinsi: '',
+    kota: '',
+    kecamatan: '',
+    kelurahan: '',
+    kode_pos: '',
+    bidang_keahlian: '',
+    no_reg_asesor: '',
+    no_lisensi: '',
+    masa_berlaku: '',
+    status_asesor: 'aktif'
   });
 
   // --- 1. FETCH DATA ASESOR ---
@@ -68,12 +88,9 @@ const Asesor = () => {
 
   useEffect(() => { fetchData(pagination.page); }, [pagination.page]);
 
-  // --- 2. LOGIKA WILAYAH (SESUAI ROUTE ANDA) ---
+  // --- 2. LOGIKA WILAYAH (BACKEND PROXY) ---
   useEffect(() => {
     if (showModal) {
-      if (modalType === 'create') {
-        setKotaList([]); setKecamatanList([]); setKelurahanList([]);
-      }
       api.get('/public/provinsi')
         .then(res => setProvinsiList(res.data))
         .catch(err => console.error("Gagal ambil provinsi:", err));
@@ -105,8 +122,6 @@ const Asesor = () => {
   }, [selectedWilayahId.kecamatan]);
 
   // --- HANDLERS ---
-  const handleSearch = (e) => { e.preventDefault(); setPagination(prev => ({ ...prev, page: 1 })); fetchData(1); };
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -114,8 +129,7 @@ const Asesor = () => {
 
   const handleWilayahChange = (e, level) => {
     const selectedId = e.target.value;
-    const selectedIndex = e.target.selectedIndex;
-    const selectedName = e.target.options[selectedIndex] ? e.target.options[selectedIndex].text : '';
+    const selectedName = e.target.options[e.target.selectedIndex].text;
 
     setFormData(prev => ({ ...prev, [level]: selectedName }));
 
@@ -133,97 +147,59 @@ const Asesor = () => {
     }
   };
 
-  const resetForm = () => {
-    setFormData({
-      username: '', password: '',
-      nik: '', gelar_depan: '', nama_lengkap: '', gelar_belakang: '',
-      jenis_kelamin: 'laki-laki', tempat_lahir: '', tanggal_lahir: '', kebangsaan: 'Indonesia',
-      pendidikan_terakhir: '', tahun_lulus: '', institut_asal: '',
-      alamat: '', rt: '', rw: '', provinsi: '', kota: '', kecamatan: '', kelurahan: '', kode_pos: '',
-      bidang_keahlian: '', no_reg_asesor: '', no_lisensi: '', masa_berlaku: '', status_asesor: 'aktif'
-    });
-    setSelectedWilayahId({ provinsi: '', kota: '', kecamatan: '' });
-    setShowPassword(false); // Reset status password
-  };
-
-  const handleCreate = () => {
-    setModalType('create');
-    resetForm();
-    setShowModal(true);
-  };
-
-  const handleEdit = (item) => {
-    setModalType('edit');
-    setFormData({ ...item, password: '' });
-    setShowModal(true);
-  };
-
-  const handleDetail = (item) => {
-    setModalType('detail');
-    setFormData(item);
-    setShowModal(true);
-  };
-
-  const handleDelete = async (id) => {
-    const result = await Swal.fire({
-      title: 'Hapus Asesor?', text: "Data akan dihapus permanen.", icon: 'warning',
-      showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Ya, Hapus!'
-    });
-    if (result.isConfirmed) {
-      try {
-        await api.delete(`/admin/asesor/${id}`);
-        Swal.fire('Terhapus!', 'Data berhasil dihapus.', 'success');
-        fetchData(pagination.page);
-      } catch (error) {
-        Swal.fire('Gagal!', error.response?.data?.message || 'Gagal menghapus data.', 'error');
-      }
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       if (modalType === 'create') {
+        // Mengirim data lengkap sesuai alur backend Anda
         await api.post('/admin/asesor', formData);
-        Swal.fire('Berhasil!', 'Asesor berhasil ditambahkan.', 'success');
+        Swal.fire('Berhasil!', 'Asesor dan Akun berhasil dibuat.', 'success');
       } else {
-        const updatePayload = { ...formData };
-        if (!updatePayload.password) delete updatePayload.password;
-        await api.put(`/admin/asesor/${formData.id_asesor || formData.id_user}`, updatePayload);
+        const payload = { ...formData };
+        if (!payload.password) delete payload.password;
+        await api.put(`/admin/asesor/${formData.id_user}`, payload);
         Swal.fire('Berhasil!', 'Data diperbarui.', 'success');
       }
       setShowModal(false);
       fetchData(pagination.page);
     } catch (error) {
-      console.error(error);
       Swal.fire('Gagal!', error.response?.data?.message || 'Terjadi kesalahan sistem.', 'error');
     }
+  };
+
+  const openModal = (type, item = null) => {
+    setModalType(type);
+    setShowPassword(false);
+    if (item) {
+      setFormData({ ...item, password: '' });
+    } else {
+      setFormData({
+        username: '', password: '', email: '', no_hp: '',
+        nik: '', gelar_depan: '', nama_lengkap: '', gelar_belakang: '',
+        jenis_kelamin: 'laki-laki', tempat_lahir: '', tanggal_lahir: '', kebangsaan: 'Indonesia',
+        pendidikan_terakhir: '', tahun_lulus: '', institut_asal: '',
+        alamat: '', rt: '', rw: '', provinsi: '', kota: '', kecamatan: '', kelurahan: '', kode_pos: '',
+        bidang_keahlian: '', no_reg_asesor: '', no_lisensi: '', masa_berlaku: '', status_asesor: 'aktif'
+      });
+      setSelectedWilayahId({ provinsi: '', kota: '', kecamatan: '' });
+    }
+    setShowModal(true);
   };
 
   const isDetailMode = modalType === 'detail';
 
   return (
     <div className="asesor-container">
-      {/* HEADER */}
       <div className="header-section">
         <div className="title-box">
           <h2>Manajemen Asesor</h2>
-          <p>Kelola data akun dan profil asesor.</p>
+          <p>Kelola data akun login dan informasi profil lengkap asesor.</p>
         </div>
-        <button className="btn-create" onClick={handleCreate}>
+        <button className="btn-create" onClick={() => openModal('create')}>
           <Plus size={18} /> Tambah Asesor
         </button>
       </div>
 
-      {/* SEARCH */}
-      <div className="filter-section">
-        <form onSubmit={handleSearch} className="search-box">
-          <Search className="search-icon" size={20} />
-          <input type="text" placeholder="Cari Nama / NIK..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-        </form>
-      </div>
-
-      {/* TABLE */}
       <div className="table-container">
         {loading ? <div className="loading-state"><Loader2 className="animate-spin"/> Memuat...</div> : (
           <table className="custom-table">
@@ -237,27 +213,14 @@ const Asesor = () => {
                 data.map((item, index) => (
                   <tr key={item.id_user || index}>
                     <td>{(pagination.page - 1) * pagination.limit + index + 1}</td>
-                    <td>
-                      <div className="user-info">
-                        <div className="user-avatar"><User size={16}/></div>
-                        <div>
-                          <span className="font-medium">{item.gelar_depan} {item.nama_lengkap} {item.gelar_belakang}</span>
-                          <div className="text-xs text-gray-500">{item.bidang_keahlian}</div>
-                        </div>
-                      </div>
-                    </td>
+                    <td>{item.nama_lengkap}</td>
                     <td>{item.nik}</td>
-                    <td>{item.user?.username || item.username || '-'}</td>
-                    <td>
-                      <span className={`status-badge ${item.status_asesor === 'aktif' ? 'success' : 'inactive'}`}>
-                        {item.status_asesor ? item.status_asesor.toUpperCase() : 'NONAKTIF'}
-                      </span>
-                    </td>
+                    <td>{item.user?.username || '-'}</td>
+                    <td><span className={`status-badge ${item.status_asesor === 'aktif' ? 'success' : 'inactive'}`}>{item.status_asesor}</span></td>
                     <td>
                       <div className="action-buttons">
-                        <button className="btn-action view" onClick={() => handleDetail(item)}><Eye size={16}/></button>
-                        <button className="btn-action edit" onClick={() => handleEdit(item)}><Edit2 size={16}/></button>
-                        <button className="btn-action delete" onClick={() => handleDelete(item.id_user)}><Trash2 size={16}/></button>
+                        <button className="btn-action view" onClick={() => openModal('detail', item)}><Eye size={16}/></button>
+                        <button className="btn-action edit" onClick={() => openModal('edit', item)}><Edit2 size={16}/></button>
                       </div>
                     </td>
                   </tr>
@@ -268,79 +231,63 @@ const Asesor = () => {
         )}
       </div>
 
-      {/* PAGINATION */}
-      <div className="pagination-section">
-        <span>Halaman {pagination.page} dari {pagination.totalPages}</span>
-        <div className="pagination-controls">
-          <button disabled={pagination.page===1} onClick={() => setPagination(p=>({...p, page: p.page-1}))}><ChevronLeft size={16}/></button>
-          <button disabled={pagination.page===pagination.totalPages} onClick={() => setPagination(p=>({...p, page: p.page+1}))}><ChevronRight size={16}/></button>
-        </div>
-      </div>
-
-      {/* MODAL FORM */}
       {showModal && (
         <div className="modal-overlay">
           <div className="modal-content large">
             <div className="modal-header">
-              <h3>{modalType === 'create' ? 'Tambah Asesor Baru' : modalType === 'edit' ? 'Edit Asesor' : 'Detail Asesor'}</h3>
+              <h3>{modalType === 'create' ? 'Tambah Asesor' : modalType === 'edit' ? 'Edit Asesor' : 'Detail Asesor'}</h3>
               <button className="close-btn" onClick={() => setShowModal(false)}><X size={20}/></button>
             </div>
             
             <form onSubmit={handleSubmit}>
               <div className="modal-body scrollable">
                 
-                {/* 1. DATA AKUN */}
-                {modalType !== 'detail' && (
-                  <>
-                    <h4 className="section-title"><Lock size={16} /> Data Akun Login</h4>
-                    <div className="form-row">
-                      <div className="form-group">
-                        <label>Username <span className="text-red-500">*</span></label>
-                        <div className="input-with-icon">
-                          <User size={14} className="input-icon-left"/>
-                          <input type="text" name="username" className="pl-8" value={formData.username} onChange={handleInputChange} disabled={modalType === 'edit'} required placeholder="Buat username unik"/>
-                        </div>
-                      </div>
-                      
-                      {/* --- INPUT PASSWORD DENGAN FITUR MATA --- */}
-                      <div className="form-group">
-                        <label>Password {modalType === 'create' && <span className="text-red-500">*</span>}</label>
-                        <div className="input-with-icon" style={{ position: 'relative' }}>
-                          <Key size={14} className="input-icon-left"/>
-                          <input 
-                            type={showPassword ? "text" : "password"} 
-                            name="password" 
-                            className="pl-8 pr-10" /* pr-10 untuk memberi ruang ikon mata */
-                            value={formData.password} 
-                            onChange={handleInputChange} 
-                            required={modalType === 'create'} 
-                            placeholder={modalType === 'create' ? "Password akun" : "Kosongkan jika tidak diganti"}
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setShowPassword(!showPassword)}
-                            style={{ 
-                              position: 'absolute', 
-                              right: '10px', 
-                              top: '50%', 
-                              transform: 'translateY(-50%)', 
-                              background: 'transparent', 
-                              border: 'none', 
-                              cursor: 'pointer',
-                              color: '#94a3b8'
-                            }}
-                          >
-                            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                          </button>
-                        </div>
-                      </div>
+                {/* 1. DATA AKUN (Wajib diisi karena tabel users NOT NULL) */}
+                <h4 className="section-title"><Lock size={16} /> Data Akun Login</h4>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Username <span className="text-red-500">*</span></label>
+                    <input type="text" name="username" value={formData.username} onChange={handleInputChange} disabled={modalType === 'edit' || isDetailMode} required placeholder="Username untuk login"/>
+                  </div>
+                  <div className="form-group">
+                    <label>Password {modalType === 'create' && <span className="text-red-500">*</span>}</label>
+                    <div className="input-with-icon" style={{ position: 'relative' }}>
+                      <Key size={14} className="input-icon-left"/>
+                      <input 
+                        type={showPassword ? "text" : "password"} 
+                        name="password" 
+                        className="pl-8 pr-10"
+                        value={formData.password} 
+                        onChange={handleInputChange} 
+                        required={modalType === 'create'} 
+                        disabled={isDetailMode}
+                        placeholder={modalType === 'create' ? "Password akun" : "Kosongkan jika tidak diganti"}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'transparent', border: 'none', cursor: 'pointer' }}
+                      >
+                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
                     </div>
-                    <hr className="divider"/>
-                  </>
-                )}
+                  </div>
+                </div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Email Utama <span className="text-red-500">*</span></label>
+                    <input type="email" name="email" value={formData.email} onChange={handleInputChange} required disabled={isDetailMode} placeholder="Contoh: asesor@gmail.com"/>
+                  </div>
+                  <div className="form-group">
+                    <label>No. HP (WhatsApp) <span className="text-red-500">*</span></label>
+                    <input type="text" name="no_hp" value={formData.no_hp} onChange={handleInputChange} required disabled={isDetailMode} placeholder="08xxxxxxxxxx"/>
+                  </div>
+                </div>
 
-                {/* 2. DATA PRIBADI */}
-                <h4 className="section-title"><User size={16} /> Data Pribadi</h4>
+                <hr className="divider"/>
+
+                {/* 2. DATA PRIBADI (profile_asesor) */}
+                <h4 className="section-title"><User size={16} /> Profil Pribadi</h4>
                 <div className="form-row">
                   <div className="form-group"><label>NIK <span className="text-red-500">*</span></label><input type="text" name="nik" value={formData.nik} onChange={handleInputChange} disabled={isDetailMode} required maxLength="16"/></div>
                   <div className="form-group"><label>Nama Lengkap <span className="text-red-500">*</span></label><input type="text" name="nama_lengkap" value={formData.nama_lengkap} onChange={handleInputChange} disabled={isDetailMode} required/></div>
@@ -364,9 +311,9 @@ const Asesor = () => {
                 </div>
 
                 {/* 3. PENDIDIKAN */}
-                <h4 className="section-title"><BookOpen size={16} /> Pendidikan</h4>
+                <h4 className="section-title"><BookOpen size={16} /> Pendidikan Terakhir</h4>
                 <div className="form-row">
-                  <div className="form-group"><label>Pendidikan Terakhir</label><input name="pendidikan_terakhir" value={formData.pendidikan_terakhir} onChange={handleInputChange} disabled={isDetailMode}/></div>
+                  <div className="form-group"><label>Jenjang Pendidikan</label><input name="pendidikan_terakhir" value={formData.pendidikan_terakhir} onChange={handleInputChange} disabled={isDetailMode}/></div>
                   <div className="form-group"><label>Tahun Lulus</label><input type="number" name="tahun_lulus" value={formData.tahun_lulus} onChange={handleInputChange} disabled={isDetailMode}/></div>
                 </div>
                 <div className="form-row">
@@ -376,7 +323,7 @@ const Asesor = () => {
                 {/* 4. ALAMAT */}
                 <h4 className="section-title"><MapPin size={16} /> Alamat Domisili</h4>
                 <div className="form-row">
-                   <div className="form-group full-width"><label>Jalan / Nama Tempat</label><textarea name="alamat" value={formData.alamat} onChange={handleInputChange} disabled={isDetailMode} rows="2"/></div>
+                   <div className="form-group full-width"><label>Jalan / Alamat Lengkap</label><textarea name="alamat" value={formData.alamat} onChange={handleInputChange} disabled={isDetailMode} rows="2"/></div>
                 </div>
                 <div className="form-row three-col">
                    <div className="form-group"><label>RT</label><input name="rt" value={formData.rt} onChange={handleInputChange} disabled={isDetailMode} maxLength="3"/></div>
@@ -384,7 +331,6 @@ const Asesor = () => {
                    <div className="form-group"><label>Kode Pos</label><input name="kode_pos" value={formData.kode_pos} onChange={handleInputChange} disabled={isDetailMode}/></div>
                 </div>
                 
-                {/* --- INPUT WILAYAH BERTINGKAT --- */}
                 <div className="form-row">
                     <div className="form-group">
                       <label>Provinsi</label>
@@ -427,7 +373,7 @@ const Asesor = () => {
                 </div>
 
                 {/* 5. DATA PROFESI */}
-                <h4 className="section-title"><Briefcase size={16} /> Data Profesi</h4>
+                <h4 className="section-title"><Briefcase size={16} /> Data Profesi Asesor</h4>
                 <div className="form-row">
                    <div className="form-group"><label>Bidang Keahlian</label><input name="bidang_keahlian" value={formData.bidang_keahlian} onChange={handleInputChange} disabled={isDetailMode}/></div>
                    <div className="form-group"><label>Status</label>
@@ -448,7 +394,7 @@ const Asesor = () => {
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn-cancel" onClick={() => setShowModal(false)}>{isDetailMode ? 'Tutup' : 'Batal'}</button>
-                {!isDetailMode && <button type="submit" className="btn-save"><Save size={16}/> Simpan Data</button>}
+                {!isDetailMode && <button type="submit" className="btn-save"><Save size={16}/> Simpan Asesor</button>}
               </div>
             </form>
           </div>

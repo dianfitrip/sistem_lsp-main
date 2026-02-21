@@ -1,0 +1,399 @@
+/* --- CONTAINER UTAMA --- */
+.verifikasi-container {
+  padding: 10px;
+  color: #334155; /* Slate 700 */
+  font-family: 'Inter', sans-serif;
+}
+
+/* --- HEADER SECTION --- */
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.title-box h2 {
+  color: #0F172A; /* Slate 900 */
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 5px 0;
+}
+
+.title-box p {
+  font-size: 14px;
+  color: #64748B; /* Slate 500 */
+  margin: 0;
+}
+
+/* --- ACTION BAR (SEARCH & CREATE) --- */
+.action-bar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  color: #94A3B8;
+}
+
+.search-box input {
+  padding: 10px 10px 10px 40px;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  width: 250px;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.search-box input:focus {
+  border-color: #3B82F6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.btn-create {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #2563EB; /* Blue 600 */
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-create:hover {
+  background-color: #1D4ED8;
+}
+
+/* --- TABLE STYLING --- */
+.table-wrapper {
+  background: #FFFFFF;
+  border-radius: 12px;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  overflow: hidden; /* Rounded corners for table */
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-table th {
+  background-color: #F8FAFC; /* Slate 50 */
+  color: #475569; /* Slate 600 */
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 16px;
+  text-align: left;
+  border-bottom: 1px solid #E2E8F0;
+}
+
+.admin-table td {
+  padding: 16px;
+  border-bottom: 1px solid #F1F5F9;
+  font-size: 14px;
+  vertical-align: middle;
+}
+
+.admin-table tbody tr:hover {
+  background-color: #F8FAFC;
+}
+
+/* --- TYPOGRAPHY CELLS --- */
+.user-cell {
+  display: flex;
+  flex-direction: column;
+}
+
+.contact-cell {
+  display: flex;
+  flex-direction: column;
+}
+
+.text-muted {
+  font-size: 12px;
+  color: #94A3B8;
+  margin-top: 2px;
+}
+
+.fw-bold {
+  font-weight: 600;
+  color: #1E293B;
+}
+
+/* --- STATUS BADGES --- */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-badge.verified {
+  background-color: #DCFCE7; /* Green 100 */
+  color: #166534; /* Green 800 */
+  border: 1px solid #BBF7D0;
+}
+
+.status-badge.pending {
+  background-color: #FEF9C3; /* Yellow 100 */
+  color: #854D0E; /* Yellow 800 */
+  border: 1px solid #FEF08A;
+}
+
+/* --- ACTION BUTTONS (PROFESSIONAL ICONS) --- */
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.btn-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: white;
+}
+
+/* Warna Tombol Aksi */
+.btn-icon.detail {
+  background-color: #64748B; /* Slate */
+}
+.btn-icon.detail:hover { background-color: #475569; }
+
+.btn-icon.edit {
+  background-color: #F59E0B; /* Amber */
+}
+.btn-icon.edit:hover { background-color: #D97706; }
+
+.btn-icon.verify {
+  background-color: #10B981; /* Emerald */
+}
+.btn-icon.verify:hover { background-color: #059669; }
+
+.btn-icon.delete {
+  background-color: #EF4444; /* Red */
+}
+.btn-icon.delete:hover { background-color: #DC2626; }
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: #94A3B8;
+  font-style: italic;
+}
+
+/* Pagination Info */
+.pagination-info {
+  margin-top: 15px;
+  color: #64748B;
+  font-size: 13px;
+}
+
+/* ... CSS Tabel sebelumnya biarkan saja ... */
+
+/* --- MODAL STYLING (FLOATING CARD) --- */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.5); /* Gelap transparan */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px); /* Efek blur di belakang */
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modal-card {
+  background: white;
+  width: 500px;
+  max-width: 90%;
+  border-radius: 16px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #E2E8F0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #F8FAFC;
+}
+
+.modal-header h3 { margin: 0; font-size: 18px; color: #1E293B; }
+.btn-close { background: none; border: none; cursor: pointer; color: #64748B; }
+.btn-close:hover { color: #EF4444; }
+
+.modal-body { padding: 24px; }
+
+/* DETAIL VIEW STYLING */
+.detail-header-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px dashed #E2E8F0;
+}
+
+.avatar-circle {
+  width: 56px; height: 56px;
+  background: #EFF6FF; color: #3B82F6;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; font-weight: 700;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.detail-item label {
+  display: block;
+  font-size: 12px; color: #64748B;
+  margin-bottom: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.detail-item p { margin: 0; font-weight: 500; color: #334155; }
+.detail-item.full { grid-column: span 2; }
+
+/* FORM STYLING */
+.form-group { margin-bottom: 16px; }
+.form-row { display: flex; gap: 16px; }
+.form-row .form-group { flex: 1; }
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px; font-weight: 500; color: #475569;
+}
+
+.form-group input, .form-group textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #CBD5E1;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.2s;
+  box-sizing: border-box; /* Agar padding tidak merusak width */
+}
+
+.form-group input:focus, .form-group textarea:focus {
+  border-color: #3B82F6;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.btn-cancel {
+  padding: 10px 20px;
+  background: #F1F5F9; color: #475569;
+  border: none; border-radius: 8px; font-weight: 600; cursor: pointer;
+}
+
+.btn-save {
+  padding: 10px 20px;
+  background: #2563EB; color: white;
+  border: none; border-radius: 8px; font-weight: 600; cursor: pointer;
+  display: flex; align-items: center; gap: 8px;
+}
+
+.btn-save:hover { background: #1D4ED8; }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+/* Styling Tambahan untuk Form Lengkap & Detail */
+
+.form-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Label Pemisah Section di Form */
+.form-section-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748B; /* Slate 500 */
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #E2E8F0;
+  padding-bottom: 6px;
+  margin-top: 10px;
+  margin-bottom: 4px;
+}
+
+.detail-section-title {
+  grid-column: span 2; /* Full width di grid */
+  font-size: 13px;
+  font-weight: 700;
+  color: #3B82F6; /* Blue Accent */
+  background-color: #EFF6FF;
+  padding: 6px 10px;
+  border-radius: 6px;
+  margin-top: 10px;
+  margin-bottom: 5px;
+}
+
+/* Modal Scrollable jika konten panjang */
+.modal-card {
+  max-height: 90vh; /* Maksimal 90% tinggi layar */
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-body {
+  overflow-y: auto; /* Scroll jika konten melebihi tinggi */
+  padding-bottom: 30px;
+}
+
+/* Memperbaiki tampilan grid detail */
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 24px; /* Gap baris 16px, kolom 24px */
+}

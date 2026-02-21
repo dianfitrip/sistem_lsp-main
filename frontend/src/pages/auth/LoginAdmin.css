@@ -1,0 +1,149 @@
+.login-admin-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%); /* Tema Gelap Elegan */
+  padding: 20px;
+}
+
+.login-admin-card {
+  background: #ffffff;
+  width: 100%;
+  max-width: 420px;
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.login-admin-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.admin-icon-circle {
+  width: 70px;
+  height: 70px;
+  background-color: #FF8A00;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  margin: 0 auto 15px;
+  box-shadow: 0 4px 15px rgba(255, 138, 0, 0.3);
+}
+
+.login-admin-header h2 {
+  color: #333;
+  font-size: 24px;
+  font-weight: 800;
+  margin-bottom: 5px;
+}
+
+.login-admin-header p {
+  color: #666;
+  font-size: 14px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 8px;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 15px;
+  color: #aaa;
+  font-size: 16px;
+  z-index: 1;
+}
+
+.input-wrapper input {
+  width: 100%;
+  padding: 12px 45px 12px 45px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 15px;
+  transition: all 0.3s;
+  background-color: #f9f9f9;
+}
+
+.input-wrapper input:focus {
+  border-color: #FF8A00;
+  background-color: #fff;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 138, 0, 0.1);
+}
+
+.toggle-password {
+  position: absolute;
+  right: 15px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #aaa;
+  font-size: 16px;
+}
+
+.btn-admin-login {
+  width: 100%;
+  padding: 14px;
+  background-color: #FF8A00;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+  margin-top: 10px;
+}
+
+.btn-admin-login:hover {
+  background-color: #e67e00;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255, 138, 0, 0.3);
+}
+
+.btn-admin-login:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.login-admin-footer {
+  margin-top: 25px;
+  text-align: center;
+  border-top: 1px solid #eee;
+  padding-top: 15px;
+}
+
+.back-link {
+  background: none;
+  border: none;
+  color: #777;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.back-link:hover {
+  color: #FF8A00;
+  text-decoration: underline;
+}

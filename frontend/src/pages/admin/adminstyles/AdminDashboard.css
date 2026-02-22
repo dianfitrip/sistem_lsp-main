@@ -13,31 +13,33 @@
   flex-direction: column;
 }
 
-/* --- TOP HEADER --- */
+/* --- TOP HEADER (NAVBAR BARU) --- */
 .top-header {
   height: 80px;
-  background-color: #FFFFFF;
+  /* Background diubah menjadi gradasi oranye */
+  background: linear-gradient(180deg, #FF8A00 0%, #FFB156 100%);
   padding: 0 32px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid #E2E8F0;
+  border-bottom: none; /* Border bawah dihilangkan agar lebih menyatu */
   position: sticky;
   top: 0;
   z-index: 40;
+  box-shadow: 0 4px 12px rgba(255, 138, 0, 0.2); /* Tambahan bayangan halus */
 }
 
 .header-title h3 {
   margin: 0;
   font-size: 20px;
   font-weight: 700;
-  color: #1E293B;
+  color: #ffffff !important; /* Warna teks jadi putih */
 }
 
 .header-title .subtitle {
   margin: 4px 0 0;
   font-size: 13px;
-  color: #64748B;
+  color: rgba(255, 255, 255, 0.85) !important; /* Putih sedikit transparan */
 }
 
 .header-actions {
@@ -50,7 +52,7 @@
   background: none;
   border: none;
   font-size: 18px;
-  color: #64748B;
+  color: #ffffff; /* Ikon notifikasi jadi putih */
   position: relative;
   cursor: pointer;
 }
@@ -63,13 +65,14 @@
   height: 8px;
   background: #EF4444;
   border-radius: 50%;
-  border: 2px solid white;
+  border: 2px solid #FF8A00; /* Border disesuaikan agar menyatu dengan background oranye */
 }
 
 .user-profile {
   display: flex;
   align-items: center;
   gap: 12px;
+  cursor: pointer;
 }
 
 .user-profile .text-right {
@@ -80,26 +83,26 @@
   display: block;
   font-size: 14px;
   font-weight: 600;
-  color: #1E293B;
+  color: #ffffff !important; /* Nama user putih */
 }
 
 .user-profile .role {
   display: block;
   font-size: 12px;
-  color: #94A3B8;
+  color: rgba(255, 255, 255, 0.8) !important; /* Role putih transparan */
 }
 
 .user-profile .avatar {
   width: 40px;
   height: 40px;
-  background: #FFF7ED;
-  color: #FF8A00;
+  background: #ffffff; /* Background avatar putih */
+  color: #FF8A00; /* Teks inisial oranye */
   font-weight: 700;
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #FED7AA;
+  border: 2px solid rgba(255, 255, 255, 0.5); /* Border putih tipis */
 }
 
 .content-area {

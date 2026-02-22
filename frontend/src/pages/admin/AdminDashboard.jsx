@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import React from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
+import AdminNavbar from './AdminNavbar'; // Import komponen navbar yang baru dibuat
 import './adminstyles/AdminDashboard.css';
 import {
   FaLayerGroup,
@@ -60,6 +61,7 @@ const DashboardOverview = () => {
               <div className="progress-track"><div className="progress-fill" style={{width: '85%'}}></div></div>
               <span className="val">850</span>
             </div>
+            {/* ... bagian baris chart lainnya tetap sama ... */}
             <div className="bar-item">
               <span>Jaringan</span>
               <div className="progress-track"><div className="progress-fill" style={{width: '60%'}}></div></div>
@@ -100,6 +102,7 @@ const DashboardOverview = () => {
 
       {/* 3. TABLE & SCHEDULE */}
       <div className="bottom-grid">
+        {/* ... bagian tabel dan schedule tetap sama persis ... */}
         <div className="card-box table-section">
           <div className="card-header-inner">
             <h4>Pendaftaran Terbaru</h4>
@@ -153,15 +156,6 @@ const DashboardOverview = () => {
                 <p>09:00 WIB • Lab 2</p>
               </div>
             </div>
-            <div className="schedule-item">
-              <div className="date-box">
-                <span className="d">25</span><span className="m">FEB</span>
-              </div>
-              <div className="info">
-                <h5>Asesmen Mandiri</h5>
-                <p>13:00 WIB • Online</p>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -171,39 +165,9 @@ const DashboardOverview = () => {
 
 // --- KOMPONEN UTAMA: ADMIN DASHBOARD (LAYOUT) ---
 const AdminDashboard = () => {
-  const navigate = useNavigate();
   const location = useLocation();
-  const [userData, setUserData] = useState({ name: 'Admin', role: 'Administrator' });
 
-  // 1. Ambil Data User
-  useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser);
-        setUserData({
-          name: parsedUser.name || parsedUser.username || 'Admin',
-          role: parsedUser.role || 'Administrator'
-        });
-      } catch (e) {
-        console.error("Gagal parsing data user", e);
-      }
-    }
-  }, []);
-
-  // 2. Tentukan Judul Berdasarkan URL
-  const getPageTitle = () => {
-    const path = location.pathname;
-    if (path.includes('/dashboard')) return 'Dashboard Overview';
-    if (path.includes('/verifikasi-pendaftaran')) return 'Verifikasi Pendaftaran';
-    if (path.includes('/profile')) return 'Profil Admin';
-    if (path.includes('/skema')) return 'Manajemen Skema';
-    // Default formatting
-    const raw = path.split('/').pop();
-    return raw.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-  };
-
-  // 3. Cek apakah user sedang di halaman Dashboard Home
+  // Cek apakah user sedang di halaman Dashboard Home
   const isDashboardHome = location.pathname === '/admin/dashboard' || location.pathname === '/admin';
 
   return (
@@ -212,31 +176,9 @@ const AdminDashboard = () => {
       <Sidebar />
       
       <main className="main-content">
-        {/* TOP HEADER */}
-        <header className="top-header">
-          <div className="header-title">
-            <h3>{getPageTitle()}</h3>
-            <p className="subtitle">Selamat datang kembali, {userData.name}.</p>
-          </div>
-          
-          <div className="header-actions">
-            {/* PROFILE CLICKABLE -> MENUJU HALAMAN PROFILE */}
-            <div 
-              className="user-profile clickable" 
-              onClick={() => navigate('/admin/profile')}
-              title="Lihat Profil"
-              style={{ cursor: 'pointer' }}
-            >
-              <div className="text-right">
-                <span className="name">{userData.name}</span>
-                <span className="role">{userData.role}</span>
-              </div>
-              <div className="avatar">
-                {userData.name.charAt(0).toUpperCase()}
-              </div>
-            </div>
-          </div>
-        </header>
+        
+        {/* PANGGIL ADMIN NAVBAR YANG BARU */}
+        <AdminNavbar />
 
         {/* DYNAMIC CONTENT AREA */}
         <div className="content-area">

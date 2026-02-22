@@ -1,106 +1,114 @@
 import React, { useState, useEffect } from 'react';
-
 import Swal from 'sweetalert2';
 import api from "../../services/api";
 import { 
-  Search, Plus, Eye, Edit2, Trash2, CheckCircle, X, Save, 
-  User, Mail, Phone, MapPin, Briefcase, Calendar, Layers 
+  Search, Eye, CheckCircle, XCircle, 
+  User, Mail, Phone, MapPin, Briefcase, Calendar, School, Loader2 
 } from 'lucide-react';
 import './adminstyles/VerifikasiPendaftaran.css';
 
-
 const VerifikasiPendaftaran = () => {
   const [data, setData] = useState([]);
-  const [filteredData, setFilteredData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
 
   // State Modal
   const [showModal, setShowModal] = useState(false);
-  const [modalType, setModalType] = useState(''); // 'create', 'edit', 'detail'
   const [selectedItem, setSelectedItem] = useState(null);
-  
-  // State Form Lengkap
-  const [formData, setFormData] = useState({
-    nama_lengkap: '', 
-    nik: '', 
-    email: '', 
-    no_hp: '', 
-    program_studi: '', 
-    id_tuk: '',
-    provinsi: '', 
-    kota: '', 
-    kecamatan: '', 
-    kelurahan: '', 
-    alamat_lengkap: ''
-  });
-
-  // --- HELPER: FORMAT TANGGAL ---
-  const formatDate = (dateString) => {
-    if (!dateString) return '-';
-    return new Date(dateString).toLocaleDateString('id-ID', {
-      day: 'numeric', month: 'long', year: 'numeric',
-      hour: '2-digit', minute: '2-digit'
-    });
-  };
 
   // --- FETCH DATA ---
   const fetchData = async () => {
     setLoading(true);
     try {
       const response = await api.get('/admin/pendaftaran');
-      const result = response.data.data || response.data;
-      setData(result);
-      setFilteredData(result);
-    } catch (err) {
-      console.error(err);
-      Swal.fire("Gagal", "Gagal memuat data.", "error");
+      if (response.data.success) {
+        setData(response.data.data);
+      }
+    } catch (error) {
+      console.error(error);
+      Swal.fire('Error', 'Gagal mengambil data pendaftaran', 'error');
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => { fetchData(); }, []);
-
-  // --- SEARCH LOGIC ---
   useEffect(() => {
-    const lower = searchTerm.toLowerCase();
-    setFilteredData(data.filter(item => 
-      item.nama_lengkap?.toLowerCase().includes(lower) ||
-      item.email?.toLowerCase().includes(lower) ||
-      item.program_studi?.toLowerCase().includes(lower)
-    ));
-  }, [searchTerm, data]);
+    fetchData();
+  }, []);
 
-  // --- HANDLERS MODAL ---
-  const openModal = (type, item = null) => {
-    setModalType(type);
+  // --- HANDLERS ---
+  
+  const handleApprove = async (id) => {
+    const result = await Swal.fire({
+      title: 'Verifikasi Pendaftaran?',
+      text: "Sistem akan membuat akun User untuk Asesi ini.",
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, Verifikasi',
+      cancelButtonText: 'Batal',
+      confirmButtonColor: '#10B981', 
+      cancelButtonColor: '#6B7280'
+    });
+
+    if (result.isConfirmed) {
+      Swal.fire({
+        title: 'Memproses...',
+        text: 'Sedang membuat akun...',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+
+      try {
+        await api.post(`/admin/pendaftaran/${id}/approve`);
+        Swal.fire('Berhasil!', 'Akun Asesi telah dibuat.', 'success');
+        fetchData();
+      } catch (error) {
+        Swal.fire('Gagal', error.response?.data?.message || 'Terjadi kesalahan', 'error');
+      }
+    }
+  };
+
+  const handleReject = async (id) => {
+    const result = await Swal.fire({
+      title: 'Tolak Pendaftaran?',
+      text: "Status akan diubah menjadi Rejected.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, Tolak',
+      cancelButtonText: 'Batal',
+      confirmButtonColor: '#EF4444',
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await api.post(`/admin/pendaftaran/${id}/reject`);
+        Swal.fire('Ditolak', 'Pendaftaran telah ditolak.', 'success');
+        fetchData();
+      } catch (error) {
+        Swal.fire('Error', 'Gagal menolak pendaftaran', 'error');
+      }
+    }
+  };
+
+  // Filter Data
+  const filteredData = data.filter(item => 
+    item.nama_lengkap.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.nik.includes(searchTerm) ||
+    item.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const formatDate = (dateString) => {
+    if (!dateString) return '-';
+    return new Date(dateString).toLocaleDateString('id-ID', {
+      day: 'numeric', month: 'long', year: 'numeric'
+    });
+  };
+
+  const openDetailModal = (item) => {
     setSelectedItem(item);
     setShowModal(true);
-
-    if (type === 'create') {
-      // Reset Form untuk Create
-      setFormData({ 
-        nama_lengkap: '', nik: '', email: '', no_hp: '', 
-        program_studi: '', id_tuk: '',
-        provinsi: '', kota: '', kecamatan: '', kelurahan: '', alamat_lengkap: '' 
-      });
-    } else if (item) {
-      // Isi Form untuk Edit (Map semua field)
-      setFormData({
-        nama_lengkap: item.nama_lengkap || '',
-        nik: item.nik || '',
-        email: item.email || '',
-        no_hp: item.no_hp || '',
-        program_studi: item.program_studi || '',
-        id_tuk: item.id_tuk || '',
-        provinsi: item.provinsi || '',
-        kota: item.kota || '',
-        kecamatan: item.kecamatan || '',
-        kelurahan: item.kelurahan || '',
-        alamat_lengkap: item.alamat_lengkap || ''
-      });
-    }
   };
 
   const closeModal = () => {
@@ -108,222 +116,222 @@ const VerifikasiPendaftaran = () => {
     setSelectedItem(null);
   };
 
-  // --- CRUD ACTIONS ---
-  const handleSave = async (e) => {
-    e.preventDefault();
-    try {
-      if (modalType === 'create') {
-        await api.post('/admin/pendaftaran', formData);
-        Swal.fire("Sukses", "Data berhasil ditambahkan", "success");
-      } else if (modalType === 'edit') {
-        await api.put(`/admin/pendaftaran/${selectedItem.id_pendaftaran}`, formData);
-        Swal.fire("Sukses", "Data berhasil diperbarui", "success");
-      }
-      closeModal();
-      fetchData(); 
-    } catch (err) {
-      Swal.fire("Error", err.response?.data?.message || "Terjadi kesalahan", "error");
-    }
-  };
-
-  const handleDelete = async (id) => {
-    const result = await Swal.fire({
-      title: 'Hapus Data?', text: "Data tidak bisa dikembalikan!", icon: 'warning',
-      showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Ya, Hapus'
-    });
-    if (result.isConfirmed) {
-      try {
-        await api.delete(`/admin/pendaftaran/${id}`);
-        setData(data.filter(i => i.id_pendaftaran !== id));
-        Swal.fire('Terhapus!', 'Data telah dihapus.', 'success');
-      } catch (err) { Swal.fire('Gagal', 'Gagal menghapus data.', 'error'); }
-    }
-  };
-
-  const handleVerifikasi = async (asesi) => {
-    const result = await Swal.fire({
-      title: 'Verifikasi Akun?', text: `Buatkan akun untuk ${asesi.nama_lengkap}?`,
-      icon: 'question', showCancelButton: true, confirmButtonColor: '#10B981'
-    });
-    if (result.isConfirmed) {
-      try {
-        await api.post(`/admin/pendaftaran/${asesi.id_pendaftaran}/verifikasi`);
-        Swal.fire('Berhasil!', 'Akun aktif.', 'success');
-        fetchData();
-      } catch (err) { Swal.fire('Gagal', err.response?.data?.message, 'error'); }
-    }
-  };
-
-  // --- RENDER MODAL CONTENT ---
-  const renderModalContent = () => {
-    // 1. TAMPILAN DETAIL
-    if (modalType === 'detail') {
-      return (
-        <div className="detail-view">
-          <div className="detail-header-card">
-            <div className="avatar-circle">{selectedItem?.nama_lengkap?.charAt(0)}</div>
-            <div>
-              <h3>{selectedItem?.nama_lengkap}</h3>
-              <p className="text-muted">{selectedItem?.email}</p>
-            </div>
-            {selectedItem?.user_id ? (
-              <span className="badge-verified"><CheckCircle size={14}/> Terverifikasi</span>
-            ) : (
-              <span className="badge-pending">Menunggu</span>
-            )}
-          </div>
-          
-          <div className="detail-grid">
-            <div className="detail-section-title">Data Pribadi</div>
-            <div className="detail-item"><User size={16}/> <label>NIK</label> <p>{selectedItem?.nik || '-'}</p></div>
-            <div className="detail-item"><Phone size={16}/> <label>No HP</label> <p>{selectedItem?.no_hp || '-'}</p></div>
-            
-            <div className="detail-section-title">Kompetensi</div>
-            <div className="detail-item"><Briefcase size={16}/> <label>Prodi</label> <p>{selectedItem?.program_studi || '-'}</p></div>
-            <div className="detail-item"><Layers size={16}/> <label>ID TUK</label> <p>{selectedItem?.id_tuk || '-'}</p></div>
-            <div className="detail-item"><Calendar size={16}/> <label>Tanggal Daftar</label> <p>{formatDate(selectedItem?.tanggal_daftar)}</p></div>
-            
-            <div className="detail-section-title">Alamat & Domisili</div>
-            <div className="detail-item"><MapPin size={16}/> <label>Provinsi</label> <p>{selectedItem?.provinsi || '-'}</p></div>
-            <div className="detail-item"><MapPin size={16}/> <label>Kota/Kab</label> <p>{selectedItem?.kota || '-'}</p></div>
-            <div className="detail-item"><MapPin size={16}/> <label>Kecamatan</label> <p>{selectedItem?.kecamatan || '-'}</p></div>
-            <div className="detail-item"><MapPin size={16}/> <label>Kelurahan</label> <p>{selectedItem?.kelurahan || '-'}</p></div>
-            <div className="detail-item full"><MapPin size={16}/> <label>Alamat Lengkap</label> <p>{selectedItem?.alamat_lengkap || '-'}</p></div>
-          </div>
-        </div>
-      );
-    }
-
-    // 2. FORM CREATE / EDIT LENGKAP
-    return (
-      <form onSubmit={handleSave} className="form-modal">
-        {/* Section 1: Data Pribadi */}
-        <div className="form-section-label">Data Pribadi</div>
-        <div className="form-group">
-          <label>Nama Lengkap</label>
-          <input type="text" value={formData.nama_lengkap} onChange={e => setFormData({...formData, nama_lengkap: e.target.value})} required placeholder="Sesuai KTP"/>
-        </div>
-        <div className="form-row">
-          <div className="form-group">
-            <label>NIK</label>
-            <input type="text" value={formData.nik} onChange={e => setFormData({...formData, nik: e.target.value})} required maxLength="16" placeholder="16 Digit"/>
-          </div>
-          <div className="form-group">
-            <label>No HP</label>
-            <input type="text" value={formData.no_hp} onChange={e => setFormData({...formData, no_hp: e.target.value})} required placeholder="08..."/>
-          </div>
-        </div>
-        <div className="form-group">
-          <label>Email</label>
-          <input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required placeholder="email@domain.com"/>
-        </div>
-
-        {/* Section 2: Kompetensi */}
-        <div className="form-section-label">Kompetensi & Lokasi</div>
-        <div className="form-row">
-          <div className="form-group">
-            <label>Program Studi</label>
-            <input type="text" value={formData.program_studi} onChange={e => setFormData({...formData, program_studi: e.target.value})} required placeholder="Contoh: Teknik Mesin"/>
-          </div>
-          <div className="form-group">
-            <label>ID TUK (Tempat Uji)</label>
-            <input type="number" value={formData.id_tuk} onChange={e => setFormData({...formData, id_tuk: e.target.value})} placeholder="ID TUK"/>
-          </div>
-        </div>
-
-        {/* Section 3: Data Wilayah */}
-        <div className="form-section-label">Alamat Domisili</div>
-        <div className="form-row">
-          <div className="form-group">
-            <label>Provinsi</label>
-            <input type="text" value={formData.provinsi} onChange={e => setFormData({...formData, provinsi: e.target.value})} placeholder="Provinsi"/>
-          </div>
-          <div className="form-group">
-            <label>Kota / Kabupaten</label>
-            <input type="text" value={formData.kota} onChange={e => setFormData({...formData, kota: e.target.value})} placeholder="Kota"/>
-          </div>
-        </div>
-        <div className="form-row">
-          <div className="form-group">
-            <label>Kecamatan</label>
-            <input type="text" value={formData.kecamatan} onChange={e => setFormData({...formData, kecamatan: e.target.value})} placeholder="Kecamatan"/>
-          </div>
-          <div className="form-group">
-            <label>Kelurahan</label>
-            <input type="text" value={formData.kelurahan} onChange={e => setFormData({...formData, kelurahan: e.target.value})} placeholder="Kelurahan"/>
-          </div>
-        </div>
-        <div className="form-group">
-          <label>Alamat Lengkap</label>
-          <textarea rows="2" value={formData.alamat_lengkap} onChange={e => setFormData({...formData, alamat_lengkap: e.target.value})} placeholder="Jalan, RT/RW, Kode Pos"></textarea>
-        </div>
-
-        <div className="modal-actions">
-          <button type="button" className="btn-cancel" onClick={closeModal}>Batal</button>
-          <button type="submit" className="btn-save"><Save size={16}/> Simpan Data</button>
-        </div>
-      </form>
-    );
-  };
-
   return (
-    <div className="verifikasi-container">
-      {/* HEADER */}
-      <div className="header-section">
-        <div className="title-box">
-          <h2>Verifikasi Pendaftaran</h2>
-          <p>Kelola data calon asesi LSP</p>
+    <div className="verifikasi-page">
+      {/* Header & Stats */}
+      <div className="page-header">
+        <div>
+          <h1 className="page-title">Verifikasi Pendaftaran</h1>
+          <p className="page-subtitle">Kelola validasi data calon asesi baru</p>
         </div>
-        <div className="action-bar">
-          <div className="search-box">
-            <Search size={18} className="search-icon" />
-            <input type="text" placeholder="Cari data..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+        <div className="header-stats">
+          <div className="stat-item">
+            <span className="stat-label">Total Pending</span>
+            <span className="stat-value text-orange-500">
+              {data.filter(i => i.status === 'pending').length}
+            </span>
           </div>
-          <button className="btn-create" onClick={() => openModal('create')}><Plus size={18} /> Buat Baru</button>
         </div>
       </div>
 
-      {/* TABLE */}
-      <div className="table-wrapper">
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>No</th><th>Nama Lengkap</th><th>Email</th><th>Prodi</th><th>Status</th><th className="text-center">Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? <tr><td colSpan="6" className="text-center p-5">Loading...</td></tr> : 
-             filteredData.map((item, idx) => (
-              <tr key={item.id_pendaftaran}>
-                <td>{idx + 1}</td>
-                <td><span className="fw-bold">{item.nama_lengkap}</span><br/><small className="text-muted">{item.nik}</small></td>
-                <td>{item.email}</td>
-                <td>{item.program_studi}</td>
-                <td>{item.user_id ? <span className="status-badge verified">Verified</span> : <span className="status-badge pending">Pending</span>}</td>
-                <td className="text-center">
-                  <div className="action-buttons">
-                    <button className="btn-icon detail" onClick={() => openModal('detail', item)} title="Detail"><Eye size={16}/></button>
-                    <button className="btn-icon edit" onClick={() => openModal('edit', item)} title="Edit"><Edit2 size={16}/></button>
-                    {!item.user_id && <button className="btn-icon verify" onClick={() => handleVerifikasi(item)} title="Verifikasi"><CheckCircle size={16}/></button>}
-                    <button className="btn-icon delete" onClick={() => handleDelete(item.id_pendaftaran)} title="Hapus"><Trash2 size={16}/></button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {/* Toolbar / Filter */}
+      <div className="toolbar-section">
+        <div className="search-wrapper">
+          <Search className="search-icon" size={18} />
+          <input 
+            type="text" 
+            className="search-input"
+            placeholder="Cari Nama, NIK, atau Email..." 
+            value={searchTerm} 
+            onChange={(e) => setSearchTerm(e.target.value)} 
+          />
+        </div>
       </div>
 
-      {/* --- MODAL OVERLAY --- */}
-      {showModal && (
-        <div className="modal-overlay">
+      {/* Modern Table */}
+      <div className="table-wrapper">
+        {loading ? (
+          <div className="loading-state">
+            <Loader2 className="animate-spin text-blue-500" size={40} />
+            <p>Memuat data...</p>
+          </div>
+        ) : (
+          <table className="modern-table">
+            <thead>
+              <tr>
+                <th width="5%">No</th>
+                <th width="25%">Identitas Asesi</th>
+                <th width="20%">Data Akademik</th>
+                <th width="15%">Tanggal Daftar</th>
+                <th width="10%">Status</th>
+                <th width="25%" className="text-center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredData.length > 0 ? (
+                filteredData.map((item, index) => (
+                  <tr key={item.id_pendaftaran} className="table-row">
+                    <td>{index + 1}</td>
+                    <td>
+                      <div className="user-info">
+                        <div className="user-avatar">
+                          <User size={16} />
+                        </div>
+                        <div>
+                          <div className="user-name">{item.nama_lengkap}</div>
+                          <div className="user-nik">{item.nik}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div className="meta-info">
+                        <div className="meta-item font-medium">{item.program_studi}</div>
+                        <div className="meta-item text-xs text-gray-500">{item.kompetensi_keahlian}</div>
+                      </div>
+                    </td>
+                    <td>
+                      <div className="date-info">
+                        <Calendar size={12} className="inline mr-1"/>
+                        {formatDate(item.tanggal_daftar)}
+                      </div>
+                    </td>
+                    <td>
+                      <span className={`status-pill ${item.status}`}>
+                        {item.status === 'pending' && 'Menunggu'}
+                        {item.status === 'approved' && 'Terverifikasi'}
+                        {item.status === 'rejected' && 'Ditolak'}
+                      </span>
+                    </td>
+                    <td>
+                      {/* --- PERUBAHAN DI SINI: MENGGUNAKAN BUTTON TEKS --- */}
+                      <div className="action-buttons-text">
+                        <button 
+                          className="btn-text btn-detail-text" 
+                          onClick={() => openDetailModal(item)}
+                        >
+                          <Eye size={14} /> Detail
+                        </button>
+                        
+                        {item.status === 'pending' && (
+                          <>
+                            <button 
+                              className="btn-text btn-approve-text" 
+                              onClick={() => handleApprove(item.id_pendaftaran)}
+                            >
+                              <CheckCircle size={14} /> Verifikasi
+                            </button>
+                            <button 
+                              className="btn-text btn-reject-text" 
+                              onClick={() => handleReject(item.id_pendaftaran)}
+                            >
+                              <XCircle size={14} /> Tolak
+                            </button>
+                          </>
+                        )}
+                      </div>
+                      {/* -------------------------------------------------- */}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="6" className="empty-state">
+                    <div className="empty-content">
+                      <Search size={48} className="text-gray-300 mb-2"/>
+                      <p>Tidak ada data pendaftaran ditemukan.</p>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      {/* Modal Detail Modern */}
+      {showModal && selectedItem && (
+        <div className="modal-backdrop">
           <div className="modal-card">
-            <div className="modal-header">
-              <h3>{modalType === 'create' ? 'Tambah Data Baru' : modalType === 'edit' ? 'Edit Data Asesi' : 'Detail Pendaftaran'}</h3>
-              <button className="btn-close" onClick={closeModal}><X size={20}/></button>
+            <div className="modal-header-modern">
+              <div>
+                <h3>Detail Pendaftaran</h3>
+                <p className="text-sm opacity-80">Informasi lengkap calon asesi</p>
+              </div>
+              <button className="btn-close-modern" onClick={closeModal}>
+                <XCircle size={24}/>
+              </button>
             </div>
-            <div className="modal-body">
-              {renderModalContent()}
+            
+            <div className="modal-body-scroll">
+              <div className={`status-banner ${selectedItem.status}`}>
+                Status: {selectedItem.status.toUpperCase()}
+              </div>
+
+              <div className="detail-grid-modern">
+                <div className="detail-col">
+                  <div className="detail-group">
+                    <h4 className="group-title"><User size={16}/> Identitas Diri</h4>
+                    <div className="detail-row">
+                      <span className="label">Nama Lengkap</span>
+                      <span className="value">{selectedItem.nama_lengkap}</span>
+                    </div>
+                    <div className="detail-row">
+                      <span className="label">NIK</span>
+                      <span className="value">{selectedItem.nik}</span>
+                    </div>
+                  </div>
+
+                  <div className="detail-group">
+                    <h4 className="group-title"><School size={16}/> Akademik</h4>
+                    <div className="detail-row">
+                      <span className="label">Program Studi</span>
+                      <span className="value">{selectedItem.program_studi}</span>
+                    </div>
+                    <div className="detail-row">
+                      <span className="label">Kompetensi</span>
+                      <span className="value">{selectedItem.kompetensi_keahlian}</span>
+                    </div>
+                    <div className="detail-row">
+                      <span className="label">Wilayah RJI</span>
+                      <span className="value">{selectedItem.wilayah_rji}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="detail-col">
+                  <div className="detail-group">
+                    <h4 className="group-title"><Phone size={16}/> Kontak</h4>
+                    <div className="detail-row">
+                      <span className="label">Email</span>
+                      <span className="value text-blue-600">{selectedItem.email}</span>
+                    </div>
+                    <div className="detail-row">
+                      <span className="label">No HP</span>
+                      <span className="value">{selectedItem.no_hp}</span>
+                    </div>
+                  </div>
+
+                  <div className="detail-group">
+                    <h4 className="group-title"><MapPin size={16}/> Alamat Domisili</h4>
+                    <div className="address-box">
+                      <p>{selectedItem.kelurahan}, {selectedItem.kecamatan}</p>
+                      <p>{selectedItem.kota}, {selectedItem.provinsi}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="modal-footer-modern">
+              <button className="btn-secondary" onClick={closeModal}>Tutup</button>
+              {selectedItem.status === 'pending' && (
+                <button className="btn-primary" onClick={() => {
+                  closeModal();
+                  handleApprove(selectedItem.id_pendaftaran);
+                }}>
+                  <CheckCircle size={16} className="mr-2"/> Verifikasi Sekarang
+                </button>
+              )}
             </div>
           </div>
         </div>

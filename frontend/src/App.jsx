@@ -16,12 +16,13 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import VerifikasiPendaftaran from "./pages/admin/VerifikasiPendaftaran";
 import TempatUji from "./pages/admin/TempatUji";
 import Skema from "./pages/admin/Skema"; 
+import Skkni from "./pages/admin/Skkni"; // <-- IMPORT SKKNI
 import Asesor from "./pages/admin/Asesor"; 
 import JadwalUji from "./pages/admin/JadwalUji";
 import Pengaduan from "./pages/admin/Pengaduan";
 import Banding from "./pages/admin/Banding";
 import DokumenMutu from "./pages/admin/DokumenMutu";
-import NotifikasiAdmin from "./pages/admin/Notifikasi"; // Perbaikan path import
+import NotifikasiAdmin from "./pages/admin/Notifikasi"; 
 
 function App() {
 
@@ -79,6 +80,9 @@ function App() {
 
           {/* Menu SKEMA SERTIFIKASI */}
           <Route path="skema" element={<Skema />} />
+
+          {/* Menu DATA SKKNI (BARU) */}
+          <Route path="skkni" element={<Skkni />} />
 
           {/* Menu DAFTAR ASESOR */}
           <Route path="asesor" element={<Asesor />} />

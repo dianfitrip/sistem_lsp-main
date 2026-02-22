@@ -106,6 +106,13 @@ const Sidebar = () => {
           <span className="nav-label">Dokumen Mutu</span>
         </button>
 
+        {/* --- MENU BARU SKKNI (Added Here) --- */}
+        <button className={`nav-item ${isActive('/admin/skkni') ? 'active' : ''}`} onClick={() => handleNav('/admin/skkni')}>
+          <div className="nav-icon"><FaBook /></div>
+          <span className="nav-label">Data SKKNI</span>
+        </button>
+        {/* ------------------------------------ */}
+
         <button className={`nav-item has-submenu ${openMenus.standar ? 'open' : ''}`} onClick={() => toggleMenu('standar')}>
           <div className="nav-icon"><FaAward /></div>
           <span className="nav-label">Standar Kompetensi</span>
@@ -148,17 +155,12 @@ const Sidebar = () => {
             <button className={`submenu-item ${isActive('/admin/jadwal/cari') ? 'active' : ''}`} onClick={() => handleNav('/admin/jadwal/cari')}>
               <span className="dot"></span> Cari Jadwal
             </button>
-            
-            {/* --- MENU BARU DITAMBAHKAN --- */}
             <button className={`submenu-item ${isActive('/admin/jadwal/uji-kompetensi') ? 'active' : ''}`} onClick={() => handleNav('/admin/jadwal/uji-kompetensi')}>
               <span className="dot"></span> Jadwal Uji Kompetensi
             </button>
-            {/* ----------------------------- */}
-
             <button className={`submenu-item ${isActive('/admin/jadwal/event-uji') ? 'active' : ''}`} onClick={() => handleNav('/admin/jadwal/event-uji')}>
               <span className="dot"></span> Event Uji Kompetensi
             </button>
-            
             <button className={`submenu-item ${isActive('/admin/jadwal/arsip') ? 'active' : ''}`} onClick={() => handleNav('/admin/jadwal/arsip')}>
               <span className="dot"></span> Arsip Jadwal
             </button>
@@ -178,9 +180,7 @@ const Sidebar = () => {
         {openMenus.asesi && (
           <div className="submenu">
             <button className={`submenu-item ${isActive('/admin/asesi/cari') ? 'active' : ''}`} onClick={() => handleNav('/admin/asesi/cari')}><span className="dot"></span> Pencarian Asesi</button>
-            
             <button className={`submenu-item ${isActive('/admin/verifikasi-pendaftaran') ? 'active' : ''}`} onClick={() => handleNav('/admin/verifikasi-pendaftaran')}><span className="dot"></span> Pendaftar Baru</button>
-            
             <button className={`submenu-item ${isActive('/admin/asesi/terjadwal') ? 'active' : ''}`} onClick={() => handleNav('/admin/asesi/terjadwal')}><span className="dot"></span> Terjadwal</button>
             <button className={`submenu-item ${isActive('/admin/asesi/kompeten') ? 'active' : ''}`} onClick={() => handleNav('/admin/asesi/kompeten')}><span className="dot"></span> Kompeten</button>
             <button className={`submenu-item ${isActive('/admin/asesi/belum-sertifikat') ? 'active' : ''}`} onClick={() => handleNav('/admin/asesi/belum-sertifikat')}><span className="dot"></span> Belum Sertifikat</button>
@@ -196,11 +196,9 @@ const Sidebar = () => {
         </button>
         {openMenus.asesor && (
           <div className="submenu">
-            {/* Link ke Daftar Asesor */}
             <button className={`submenu-item ${isActive('/admin/asesor') && !isActive('/admin/asesor/statistik') ? 'active' : ''}`} onClick={() => handleNav('/admin/asesor')}>
               <span className="dot"></span> Daftar Asesor
             </button>
-            
             <button className={`submenu-item ${isActive('/admin/asesor/statistik') ? 'active' : ''}`} onClick={() => handleNav('/admin/asesor/statistik')}>
               <span className="dot"></span> Statistik Wilayah
             </button>

@@ -1,20 +1,32 @@
 :root {
-  /* Color Palette - Orange Modern */
+  /* Color Palette - Orange Modern Theme */
   --primary-orange: #FF8A00;
   --primary-orange-gradient: linear-gradient(135deg, #FF9D2E 0%, #FF6A00 100%);
-  --primary-bg-hover: #FFF7ED; 
-  --text-primary: #1F2937;
-  --text-secondary: #6B7280;
-  --sidebar-bg: #FFFFFF;
-  --sidebar-border: #E5E7EB;
-  --active-shadow: 0 4px 12px rgba(255, 138, 0, 0.2);
+  
+  /* Ubah background utama jadi orange */
+  --sidebar-bg: #FF8A00; 
+  
+  /* Border putih ditebalkan agar garis pembatas lebih jelas */
+  --sidebar-border: rgba(255, 255, 255, 0.5); 
+  
+  /* Teks diubah jadi putih */
+  --text-primary: #FFFFFF;
+  --text-secondary: rgba(255, 255, 255, 0.85);
+  
+  /* Efek hover jadi putih transparan */
+  --primary-bg-hover: rgba(255, 255, 255, 0.15); 
+  
+  /* Shadow disesuaikan agak gelap */
+  --active-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .sidebar {
   width: 280px;
   height: 100vh;
-  background-color: var(--sidebar-bg);
-  border-right: 1px solid var(--sidebar-border);
+  /* Sidebar memakai gradient orange agar tidak kaku */
+  background: var(--primary-orange-gradient);
+  /* Border kanan sidebar sedikit lebih tebal & jelas */
+  border-right: 2px solid var(--sidebar-border); 
   display: flex;
   flex-direction: column;
   position: fixed;
@@ -22,7 +34,7 @@
   top: 0;
   z-index: 50;
   font-family: 'Inter', sans-serif;
-  box-shadow: 4px 0 24px rgba(0,0,0,0.02);
+  box-shadow: 4px 0 24px rgba(0,0,0,0.05);
 }
 
 /* HEADER */
@@ -33,21 +45,23 @@
   align-items: center;
   gap: 16px;
   padding: 0 24px;
-  border-bottom: 1px solid var(--sidebar-border);
-  background: #fff;
+  /* Garis bawah header ditebalkan */
+  border-bottom: 2px solid var(--sidebar-border); 
+  background: transparent; 
 }
 
+/* Logo dibalik warnanya (Bg Putih, Ikon Orange) */
 .logo-box {
   width: 40px;
   height: 40px;
-  background: var(--primary-orange-gradient);
+  background: #FFFFFF; 
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: var(--primary-orange); 
   font-size: 20px;
-  box-shadow: 0 4px 10px rgba(255, 106, 0, 0.25);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .logo-text h1 {
@@ -76,7 +90,7 @@
   width: 4px;
 }
 .sidebar-content::-webkit-scrollbar-thumb {
-  background-color: #E5E7EB;
+  background-color: rgba(255, 255, 255, 0.5); /* Scrollbar diperjelas */
   border-radius: 4px;
 }
 
@@ -85,7 +99,8 @@
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
-  color: #9CA3AF;
+  color: #FFFFFF; /* Label dibuat putih murni agar lebih menonjol */
+  opacity: 0.9;
   letter-spacing: 0.8px;
   margin: 20px 0 8px 12px;
 }
@@ -93,48 +108,45 @@
   margin-top: 0;
 }
 
-/* --- NAV ITEMS (PERBAIKAN UTAMA DI SINI) --- */
+/* --- NAV ITEMS --- */
 .nav-item {
   width: 100%;
   display: flex;
   align-items: center;
-  justify-content: flex-start; /* Pastikan semua mulai dari kiri */
+  justify-content: flex-start;
   padding: 10px 12px;
   margin-bottom: 4px;
   background: transparent;
   border: none;
   border-radius: 10px;
   cursor: pointer;
-  color: var(--text-secondary);
+  color: var(--text-secondary); 
   transition: all 0.2s ease;
   font-size: 14px;
   font-weight: 500;
 }
 
-/* Ikon dengan lebar tetap agar teks lurus vertikal */
 .nav-icon {
-  width: 24px;      /* Lebar fix */
-  min-width: 24px;  /* Mencegah shrink */
+  width: 24px; 
+  min-width: 24px; 
   font-size: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 12px; /* Jarak antara ikon dan teks */
+  margin-right: 12px; 
   transition: color 0.2s;
 }
 
-/* Label teks */
 .nav-label {
   text-align: left;
-  white-space: nowrap; /* Mencegah teks turun baris */
-  flex-grow: 1; /* Mengisi ruang kosong agar panah terdorong */
+  white-space: nowrap; 
+  flex-grow: 1; 
 }
 
-/* Panah diletakkan paling kanan */
 .arrow-icon {
   font-size: 10px;
-  opacity: 0.5;
-  margin-left: auto; /* KUNCI: Dorong panah ke ujung kanan */
+  opacity: 0.9; /* Panah diperjelas */
+  margin-left: auto; 
   display: flex;
   align-items: center;
 }
@@ -142,19 +154,20 @@
 /* STATES */
 .nav-item:hover {
   background-color: var(--primary-bg-hover);
-  color: var(--primary-orange);
+  color: #FFFFFF;
 }
 
+/* Menu Aktif dibalik (Bg Putih, Teks Orange) */
 .nav-item.active {
-  background: var(--primary-orange-gradient);
-  color: #FFFFFF;
+  background: #FFFFFF; 
+  color: var(--primary-orange); 
   box-shadow: var(--active-shadow);
-  font-weight: 600;
+  font-weight: 700; /* Sedikit lebih tebal */
 }
 
 .nav-item.active .nav-icon,
 .nav-item.active .arrow-icon {
-  color: #FFFFFF;
+  color: var(--primary-orange);
   opacity: 1;
 }
 
@@ -163,9 +176,9 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  /* Indentasi agar sejajar dengan teks menu induk */
-  padding-left: 48px; /* 12px padding + 24px icon + 12px margin */
+  padding-left: 48px; 
   margin-bottom: 8px;
+  position: relative;
 }
 
 .submenu-item {
@@ -186,22 +199,19 @@
 }
 
 .submenu-item:hover {
-  color: var(--primary-orange);
+  color: #FFFFFF;
   background-color: var(--primary-bg-hover);
 }
 
-/* Garis vertikal dekorasi untuk submenu */
-.submenu {
-  position: relative;
-}
+/* Garis vertikal dekorasi untuk submenu diperjelas */
 .submenu::before {
   content: '';
   position: absolute;
-  left: 24px; /* Posisi garis vertikal di bawah ikon induk */
+  left: 24px; 
   top: 0;
   bottom: 0;
   width: 2px;
-  background-color: #F3F4F6;
+  background-color: rgba(255, 255, 255, 0.4); 
   border-radius: 2px;
 }
 
@@ -209,33 +219,38 @@
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background-color: #D1D5DB;
+  background-color: rgba(255, 255, 255, 0.6); 
   transition: all 0.2s;
 }
 
 .submenu-item.active {
-  color: var(--primary-orange);
+  color: #FFFFFF;
   font-weight: 600;
   background-color: var(--primary-bg-hover);
 }
 
 .submenu-item.active .dot {
-  background-color: var(--primary-orange);
+  background-color: #FFFFFF;
   transform: scale(1.2);
-  box-shadow: 0 0 0 2px rgba(255, 138, 0, 0.2);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
 }
 
 /* FOOTER */
 .sidebar-footer {
   padding: 16px;
-  border-top: 1px solid var(--sidebar-border);
-  background: #fff;
+  /* Garis atas footer ditebalkan */
+  border-top: 2px solid var(--sidebar-border); 
+  background: transparent; 
 }
 
+/* Tombol Logout dibuat merah solid permanen */
 .nav-item.logout {
-  color: #EF4444;
+  color: #FFFFFF;
+  background-color: #EF4444; /* Merah cerah bawaan */
+  font-weight: 600;
 }
 .nav-item.logout:hover {
-  background-color: #FEF2F2;
-  color: #DC2626;
+  background-color: #DC2626; /* Merah agak gelap saat di-hover */
+  color: #FFFFFF;
+  box-shadow: 0 4px 10px rgba(220, 38, 38, 0.3); /* Tambahan shadow agar lebih pop */
 }

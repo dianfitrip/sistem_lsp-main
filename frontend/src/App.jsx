@@ -22,38 +22,43 @@ import Pengaduan from "./pages/admin/Pengaduan";
 import Banding from "./pages/admin/Banding";
 import DokumenMutu from "./pages/admin/DokumenMutu";
 import NotifikasiAdmin from "./pages/admin/Notifikasi"; 
-import ProfileAdmin from "./pages/admin/ProfileAdmin"; // <-- NEW: Halaman Profil
+import ProfileAdmin from "./pages/admin/ProfileAdmin";
+import UnitKompetensi from "./pages/admin/UnitKompetensi";
+
+// --- IMPORTS MENU BARU ASESI ---
+import IA01Observasi from "./pages/admin/IA01Observasi";
+import IA03Pertanyaan from "./pages/admin/IA03Pertanyaan";
 
 // --- IMPORTS USER PAGES ---
 import DashboardAsesi from "./pages/public/Profile"; // Asumsi ini dashboard user
 
+// --- GUARDS / PROTECTED ROUTES ---
+// Fungsi Cek Token (Sederhana)
+const isAuthenticated = () => {
+  return localStorage.getItem("token") !== null; 
+};
+
+// Guard: Hanya izinkan akses jika login user
+const ProtectedRoute = ({ children }) => {
+  if (!isAuthenticated()) {
+    return <Navigate to="/login" replace />; // Redirect ke login umum
+  }
+  return children;
+};
+
+// Guard Khusus Admin (Opsional: Cek Role)
+const AdminRoute = ({ children }) => {
+  const token = localStorage.getItem("token");
+  // const user = JSON.parse(localStorage.getItem("user") || "{}");
+  
+  if (!token) {
+    return <Navigate to="/admin/login" replace />;
+  }
+  // Jika ingin lebih ketat: if (user.role !== 'admin') { return <Navigate to="/" replace /> }
+  return children;
+};
+
 function App() {
-
-  // Fungsi Cek Token (Sederhana)
-  const isAuthenticated = () => {
-    return localStorage.getItem("token") !== null; 
-  };
-
-  // Guard: Hanya izinkan akses jika login
-  const ProtectedRoute = ({ children }) => {
-    if (!isAuthenticated()) {
-      return <Navigate to="/login" replace />; // Redirect ke login umum
-    }
-    return children;
-  };
-
-  // Guard Khusus Admin (Opsional: Cek Role)
-  const AdminRoute = ({ children }) => {
-    const token = localStorage.getItem("token");
-    const user = JSON.parse(localStorage.getItem("user") || "{}");
-    
-    if (!token) {
-      return <Navigate to="/admin/login" replace />;
-    }
-    // Jika ingin lebih ketat: if (user.role !== 'admin') ...
-    return children;
-  };
-
   return (
     <Router>
       <Routes>
@@ -95,6 +100,12 @@ function App() {
           <Route path="tuk" element={<TempatUji />} />
           <Route path="jadwal/uji-kompetensi" element={<JadwalUji />} />
 
+          {/* -- MODUL ASESI (Baru) -- */}
+          <Route path="asesi/ia01-observasi" element={<IA01Observasi />} />
+          <Route path="asesi/ia03-pertanyaan" element={<IA03Pertanyaan />} />
+          {/* Placeholder Halaman Belum Ada */}
+          <Route path="asesi/list" element={<div className="p-6">Halaman Daftar Asesi (Coming Soon)</div>} /> 
+
           {/* -- MODUL LAYANAN -- */}
           <Route path="pengaduan" element={<Pengaduan />} />
           <Route path="banding" element={<Banding />} />
@@ -102,10 +113,9 @@ function App() {
           <Route path="notifikasi" element={<NotifikasiAdmin />} />
 
           {/* -- MODUL AKUN -- */}
-          <Route path="profil" element={<ProfileAdmin />} /> {/* Route Profil Baru */}
+          <Route path="profil" element={<ProfileAdmin />} /> 
           
-          {/* Placeholder Halaman Belum Ada */}
-          <Route path="asesi/list" element={<div className="p-6">Halaman Daftar Asesi (Coming Soon)</div>} /> 
+          <Route path="unit-kompetensi" element={<UnitKompetensi />} />
 
         </Route>
 
@@ -121,7 +131,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-
 
         {/* =========================================
             404 PAGE NOT FOUND

@@ -3,7 +3,7 @@ import Swal from 'sweetalert2';
 import api from "../../services/api";
 import { 
   Search, Eye, Trash2, X, Save, 
-  Gavel, User, FileText, Calendar, CheckCircle, XCircle, Clock, Loader2, AlertCircle
+  Gavel, User, FileText, Calendar, CheckCircle, XCircle, Clock, Loader2, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import './adminstyles/Banding.css'; 
 
@@ -52,9 +52,8 @@ const Banding = () => {
     setLoading(true);
     try {
       // Backend: bandingController.getAllBanding
+      // Mengambil semua data array langsung (tanpa pagination server-side sementara)
       const response = await api.get('/admin/banding');
-      
-      // Backend mengembalikan { status: true, message: "...", data: [ARRAY] }
       const result = response.data.data || [];
       
       setData(result);
@@ -112,44 +111,54 @@ const Banding = () => {
   };
 
   const getKeputusanBadge = (keputusan) => {
-    if (keputusan === 'diterima') return <span className="flex items-center text-green-600 gap-1"><CheckCircle size={14}/> Diterima</span>;
-    if (keputusan === 'ditolak') return <span className="flex items-center text-red-600 gap-1"><XCircle size={14}/> Ditolak</span>;
-    return <span className="flex items-center text-gray-500 gap-1"><Clock size={14}/> Belum Diputus</span>;
+    if (keputusan === 'diterima') return <span className="flex items-center text-green-600 gap-1 font-medium"><CheckCircle size={14}/> Diterima</span>;
+    if (keputusan === 'ditolak') return <span className="flex items-center text-red-600 gap-1 font-medium"><XCircle size={14}/> Ditolak</span>;
+    return <span className="flex items-center text-gray-500 gap-1 font-medium"><Clock size={14}/> Belum Diputus</span>;
   };
 
   const formatDate = (dateStr) => {
     if (!dateStr) return '-';
     return new Date(dateStr).toLocaleDateString('id-ID', {
-      day: 'numeric', month: 'long', year: 'numeric'
+      day: 'numeric', month: 'short', year: 'numeric'
     });
   };
 
   return (
     <div className="banding-container">
-      {/* HEADER */}
+      {/* HEADER PAGE */}
       <div className="header-section">
         <div className="title-box">
           <h2>Data Banding Asesmen</h2>
-          <p>Kelola pengajuan banding dari asesi.</p>
+          <p>Kelola pengajuan banding dan keputusan pleno.</p>
         </div>
       </div>
 
-      {/* FILTER & SEARCH */}
+      {/* CONTENT CARD */}
       <div className="content-card">
-        <div className="search-bar-wrapper">
-          <Search size={20} className="text-gray-400" />
-          <input 
-            type="text" 
-            className="search-input" 
-            placeholder="Cari No Pendaftaran atau Email..." 
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+        
+        {/* --- TOOLBAR (SEARCH & TITLE) --- */}
+        <div className="table-toolbar">
+          <div className="toolbar-title">
+            <h4>Daftar Pengajuan</h4>
+          </div>
+          <div className="toolbar-actions">
+            <div className="search-bar-wrapper">
+              <Search size={18} className="search-icon-inside" />
+              <input 
+                type="text" 
+                className="search-input" 
+                placeholder="Cari No Pendaftaran / Email..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+          </div>
         </div>
 
         {loading ? (
-          <div className="p-8 text-center flex justify-center">
-            <Loader2 className="animate-spin text-orange-500" size={40} />
+          <div className="p-12 text-center flex flex-col items-center justify-center text-gray-500">
+            <Loader2 className="animate-spin mb-2 text-orange-500" size={32} />
+            <p>Sedang memuat data...</p>
           </div>
         ) : (
           <div className="table-responsive">
@@ -157,12 +166,12 @@ const Banding = () => {
               <thead>
                 <tr>
                   <th>No</th>
-                  <th>Tgl Ajukan</th>
-                  <th>Asesi (User)</th>
-                  <th>Perihal Banding</th>
-                  <th>Status Progress</th>
+                  <th>Tanggal</th>
+                  <th>Asesi</th>
+                  <th>Keterangan Banding</th>
+                  <th>Status</th>
                   <th>Keputusan</th>
-                  <th>Aksi</th>
+                  <th className="text-center">Aksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -173,7 +182,7 @@ const Banding = () => {
                       <td>{formatDate(item.tanggal_ajukan)}</td>
                       <td>
                         <div className="flex flex-col">
-                          <span className="font-medium text-sm">{item.user?.username || 'User'}</span>
+                          <span className="font-medium text-gray-800">{item.user?.username || 'User'}</span>
                           <span className="text-xs text-gray-500">{item.user?.email}</span>
                         </div>
                       </td>
@@ -184,16 +193,16 @@ const Banding = () => {
                         </div>
                       </td>
                       <td>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadge(item.status_progress)}`}>
+                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusBadge(item.status_progress)}`}>
                           {item.status_progress?.replace('_', ' ').toUpperCase()}
                         </span>
                       </td>
                       <td>{getKeputusanBadge(item.keputusan)}</td>
-                      <td>
+                      <td className="text-center">
                         <button 
                           className="btn-icon view" 
                           onClick={() => handleDetailClick(item)}
-                          title="Proses Banding"
+                          title="Proses & Detail"
                         >
                           <Gavel size={18} />
                         </button>
@@ -203,7 +212,10 @@ const Banding = () => {
                 ) : (
                   <tr>
                     <td colSpan="7" className="text-center py-8 text-gray-500">
-                      Tidak ada data banding ditemukan.
+                      <div className="flex flex-col items-center justify-center">
+                        <FileText size={48} className="text-gray-300 mb-2"/>
+                        <p>Tidak ada data banding ditemukan.</p>
+                      </div>
                     </td>
                   </tr>
                 )}
@@ -219,43 +231,43 @@ const Banding = () => {
           <div className="modal-card wide-modal">
             <div className="modal-header-modern">
               <h3><Gavel size={20} className="inline mr-2"/> Proses Banding Asesmen</h3>
-              <button onClick={() => setShowModal(false)}><X size={24}/></button>
+              <button className="btn-close-modern" onClick={() => setShowModal(false)}><X size={24}/></button>
             </div>
             
             <form onSubmit={handleUpdate} className="modal-body-scroll">
               
               {/* INFO DETAIL */}
-              <div className="bg-gray-50 p-4 rounded-lg mb-6 border border-gray-200">
-                <h4 className="text-sm font-bold text-gray-700 mb-3 flex items-center">
+              <div className="bg-slate-50 p-5 rounded-lg mb-6 border border-slate-200">
+                <h4 className="text-sm font-bold text-slate-700 mb-4 flex items-center border-b pb-2 border-slate-200">
                   <FileText size={16} className="mr-2"/> Detail Pengajuan
                 </h4>
-                <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                   <div>
-                    <label className="text-gray-500 text-xs">No Pendaftaran</label>
-                    <p className="font-medium">{selectedItem.no_pendaftaran}</p>
+                    <label className="text-slate-500 text-xs uppercase font-semibold">No Pendaftaran</label>
+                    <p className="font-medium text-slate-800">{selectedItem.no_pendaftaran}</p>
                   </div>
                   <div>
-                    <label className="text-gray-500 text-xs">Tanggal Ajukan</label>
-                    <p className="font-medium">{formatDate(selectedItem.tanggal_ajukan)}</p>
+                    <label className="text-slate-500 text-xs uppercase font-semibold">Tanggal Pengajuan</label>
+                    <p className="font-medium text-slate-800">{formatDate(selectedItem.tanggal_ajukan)}</p>
                   </div>
-                  <div className="col-span-2">
-                    <label className="text-gray-500 text-xs">Keterangan / Alasan Banding</label>
-                    <div className="bg-white p-3 border rounded mt-1 text-gray-700">
+                  <div className="md:col-span-2">
+                    <label className="text-slate-500 text-xs uppercase font-semibold">Alasan Banding</label>
+                    <div className="bg-white p-3 border border-slate-200 rounded mt-1 text-slate-700 leading-relaxed">
                       {selectedItem.keterangan_banding}
                     </div>
                   </div>
                   
-                  {/* Tampilkan Bukti jika ada */}
+                  {/* Link Bukti */}
                   {selectedItem.file_bukti && (
-                    <div className="col-span-2 mt-2">
-                      <label className="text-gray-500 text-xs">File Bukti</label>
+                    <div className="md:col-span-2 mt-2">
+                      <label className="text-slate-500 text-xs uppercase font-semibold">File Bukti Pendukung</label>
                       <a 
                         href={`http://localhost:3000/uploads/${selectedItem.file_bukti}`} 
                         target="_blank" 
                         rel="noreferrer"
-                        className="text-blue-600 hover:underline flex items-center gap-1 mt-1"
+                        className="text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-2 mt-1 font-medium"
                       >
-                        <Eye size={14}/> Lihat Bukti Pendukung
+                        <Eye size={16}/> Buka Lampiran Bukti
                       </a>
                     </div>
                   )}
@@ -264,12 +276,13 @@ const Banding = () => {
 
               {/* FORM UPDATE */}
               <div className="status-update-section">
-                <h4 className="section-title text-orange-600 mb-4">Update Status & Keputusan</h4>
+                <h4 className="section-title text-orange-600 mb-4 font-semibold">Update Keputusan Pleno</h4>
                 
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>Status Progress</label>
+                <div className="form-row flex flex-col md:flex-row gap-4">
+                  <div className="form-group flex-1">
+                    <label className="block text-sm font-medium mb-1">Status Progress</label>
                     <select 
+                      className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-200 outline-none"
                       value={formUpdate.status_progress}
                       onChange={(e) => setFormUpdate(p => ({...p, status_progress: e.target.value}))}
                     >
@@ -279,26 +292,29 @@ const Banding = () => {
                     </select>
                   </div>
 
-                  <div className="form-group">
-                    <label>Keputusan Akhir</label>
+                  <div className="form-group flex-1">
+                    <label className="block text-sm font-medium mb-1">Keputusan Akhir</label>
                     <select 
+                      className={`w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-200 outline-none ${
+                        formUpdate.keputusan === 'diterima' ? 'bg-green-50 text-green-700 font-semibold border-green-300' : 
+                        formUpdate.keputusan === 'ditolak' ? 'bg-red-50 text-red-700 font-semibold border-red-300' : ''
+                      }`}
                       value={formUpdate.keputusan}
                       onChange={(e) => setFormUpdate(p => ({...p, keputusan: e.target.value}))}
-                      className={formUpdate.keputusan === 'diterima' ? 'border-green-500 text-green-700 font-bold' : formUpdate.keputusan === 'ditolak' ? 'border-red-500 text-red-700 font-bold' : ''}
                     >
-                      <option value="belum_diputus">Belum Diputus</option>
-                      <option value="diterima">Banding Diterima (Kompeten)</option>
-                      <option value="ditolak">Banding Ditolak (Tetap BK)</option>
+                      <option value="belum_diputus">-- Belum Diputus --</option>
+                      <option value="diterima">✅ Banding Diterima (Kompeten)</option>
+                      <option value="ditolak">❌ Banding Ditolak (Tetap BK)</option>
                     </select>
                   </div>
                 </div>
 
                 <div className="form-group mt-4">
-                  <label>Catatan Komite / Hasil Pleno</label>
+                  <label className="block text-sm font-medium mb-1">Catatan Komite / Hasil Pleno</label>
                   <textarea 
                     rows="4" 
-                    className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-orange-300 outline-none"
-                    placeholder="Masukkan catatan hasil rapat pleno komite..."
+                    className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-orange-200 outline-none resize-none"
+                    placeholder="Masukkan catatan detail hasil rapat pleno komite di sini..."
                     value={formUpdate.catatan_komite}
                     onChange={(e) => setFormUpdate(p => ({...p, catatan_komite: e.target.value}))}
                   ></textarea>
@@ -306,10 +322,10 @@ const Banding = () => {
               </div>
 
               {/* FOOTER */}
-              <div className="modal-footer-modern mt-6">
-                <button type="button" className="btn-secondary" onClick={() => setShowModal(false)}>Batal</button>
-                <button type="submit" className="btn-primary">
-                  <Save size={16} className="mr-2"/> Simpan Keputusan
+              <div className="modal-footer-modern mt-6 pt-4 border-t border-gray-100 flex justify-end gap-3">
+                <button type="button" className="btn-secondary px-4 py-2 rounded border hover:bg-gray-50" onClick={() => setShowModal(false)}>Batal</button>
+                <button type="submit" className="btn-primary bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded flex items-center gap-2">
+                  <Save size={18} /> Simpan Keputusan
                 </button>
               </div>
 

@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import { FaUserShield, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaUserShield, FaLock, FaEye, FaEyeSlash, FaUser } from "react-icons/fa";
+import { Loader2 } from "lucide-react"; // Pastikan install lucide-react atau ganti dengan icon loading lain
 import api from "../../services/api"; 
 import "./LoginAdmin.css";
 
 const LoginAdmin = () => {
   const navigate = useNavigate();
 
-  // State form login
   const [formData, setFormData] = useState({
     username: "", 
     password: "",
@@ -26,54 +26,41 @@ const LoginAdmin = () => {
     setIsLoading(true);
 
     try {
-      // Mengirim request login ke backend
       const response = await api.post("/auth/login", formData);
       const resData = response.data;
 
-      console.log("Respon Login Server:", resData); // Debugging
-
-      // --- LOGIKA PENYIMPANAN TOKEN (PERBAIKAN UTAMA) ---
-      // Ambil token dari respon. Cek berbagai kemungkinan struktur respon backend
+      // Ambil token & user
       const token = resData.token || (resData.data && resData.data.token);
       const user = resData.user || (resData.data && resData.data.user);
 
-      if (token) { 
-        // 1. Simpan Token ke LocalStorage (Kunci harus "token" agar terbaca di api.js)
+      if (token) {
         localStorage.setItem("token", token);
-        
-        // 2. Simpan data user (opsional, untuk tampilan nama di dashboard)
-        if (user) {
-          localStorage.setItem("user", JSON.stringify(user));
+        localStorage.setItem("user", JSON.stringify(user));
+
+        // Cek Role Admin
+        if (user.role === "admin") {
+          Swal.fire({
+            icon: 'success',
+            title: 'Login Berhasil',
+            text: 'Selamat datang di Administrator Portal',
+            timer: 1500,
+            showConfirmButton: false
+          }).then(() => {
+            navigate("/admin/dashboard");
+          });
+        } else {
+          Swal.fire("Akses Ditolak", "Akun Anda bukan Administrator.", "error");
+          localStorage.clear();
         }
-
-        // 3. Tampilkan notifikasi sukses
-        Swal.fire({
-          icon: "success",
-          title: "Login Berhasil",
-          text: `Selamat datang, ${user?.username || 'Admin'}!`,
-          timer: 1500,
-          showConfirmButton: false
-        }).then(() => {
-          // 4. Redirect ke Dashboard
-          navigate("/admin/dashboard");
-        });
-
       } else {
-        throw new Error("Token tidak ditemukan dalam respon server");
+        throw new Error("Token tidak ditemukan");
       }
-
     } catch (error) {
       console.error("Login Error:", error);
-      
-      // Hapus token lama jika login gagal
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-
       Swal.fire({
-        icon: "error",
-        title: "Login Gagal",
-        text: error.response?.data?.message || error.message || "Username atau password salah",
-        confirmButtonColor: "#FF8A00",
+        icon: 'error',
+        title: 'Login Gagal',
+        text: error.response?.data?.message || "Username atau password salah.",
       });
     } finally {
       setIsLoading(false);
@@ -83,26 +70,31 @@ const LoginAdmin = () => {
   return (
     <div className="login-admin-container">
       <div className="login-admin-card">
-        <div className="login-admin-header">
-          <div className="admin-icon-circle">
-            <FaUserShield />
+        
+        {/* Header Section */}
+        <div className="login-header">
+          <div className="icon-badge">
+            <FaUserShield size={32} />
           </div>
-          <h2>Administrator</h2>
-          <p>Login to access LSP Control Panel</p>
+          <h2 className="title">Admin Portal</h2>
+          <p className="subtitle">Silakan login untuk mengelola sistem.</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="login-admin-form">
+        {/* Form Section */}
+        <form onSubmit={handleSubmit} className="login-form">
+          
           <div className="form-group">
             <label>Username</label>
             <div className="input-wrapper">
-              <FaUserShield className="input-icon" />
+              <FaUser className="input-icon" />
               <input
-                type="text" 
-                name="username" 
+                type="text"
+                name="username"
                 placeholder="Masukkan username admin"
                 value={formData.username} 
                 onChange={handleChange}
                 required
+                autoComplete="off"
               />
             </div>
           </div>
@@ -114,7 +106,7 @@ const LoginAdmin = () => {
               <input
                 type={showPassword ? "text" : "password"}
                 name="password"
-                placeholder="Enter your password"
+                placeholder="Masukkan password"
                 value={formData.password}
                 onChange={handleChange}
                 required
@@ -132,19 +124,22 @@ const LoginAdmin = () => {
 
           <button
             type="submit"
-            className="btn-admin-login"
+            className="btn-login-submit"
             disabled={isLoading}
           >
-            {isLoading ? "Authenticating..." : "LOGIN TO DASHBOARD"}
+            {isLoading ? (
+              <span className="flex items-center justify-center gap-2">
+                <Loader2 className="animate-spin" size={18} /> Memproses...
+              </span>
+            ) : (
+              "MASUK KE DASHBOARD"
+            )}
           </button>
         </form>
 
-        <div className="login-admin-footer">
-          <button
-            onClick={() => navigate("/login")}
-            className="back-link"
-          >
-            &larr; Back to User Login
+        <div className="login-footer">
+          <button onClick={() => navigate("/login")} className="link-back">
+            &larr; Kembali ke Halaman Utama
           </button>
         </div>
       </div>

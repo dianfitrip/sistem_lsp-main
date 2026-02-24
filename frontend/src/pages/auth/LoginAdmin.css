@@ -1,149 +1,220 @@
+/* --- Variables & Reset --- */
+:root {
+  --primary-color: #F97316; /* Orange sesuai tema */
+  --primary-hover: #EA580C;
+  --bg-gradient-start: #0F172A; /* Slate 900 */
+  --bg-gradient-end: #1E293B;   /* Slate 800 */
+  --card-bg: #FFFFFF;
+  --text-main: #1E293B;
+  --text-muted: #64748B;
+  --border-color: #E2E8F0;
+  --input-focus-ring: rgba(249, 115, 22, 0.2);
+}
+
+/* --- Layout Container --- */
 .login-admin-container {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%); /* Tema Gelap Elegan */
+  background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
   padding: 20px;
+  font-family: 'Inter', sans-serif;
 }
 
+/* --- Card Design --- */
 .login-admin-card {
-  background: #ffffff;
+  background: var(--card-bg);
   width: 100%;
-  max-width: 420px;
+  max-width: 400px;
   padding: 40px;
   border-radius: 16px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  animation: slideUp 0.5s ease-out;
 }
 
-.login-admin-header {
+/* --- Header Section --- */
+.login-header {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 32px;
 }
 
-.admin-icon-circle {
-  width: 70px;
-  height: 70px;
-  background-color: #FF8A00;
-  color: white;
+.icon-badge {
+  width: 64px;
+  height: 64px;
+  background-color: #FFF7ED;
+  color: var(--primary-color);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 32px;
-  margin: 0 auto 15px;
-  box-shadow: 0 4px 15px rgba(255, 138, 0, 0.3);
+  margin: 0 auto 16px;
+  border: 1px solid #FFEDD5;
 }
 
-.login-admin-header h2 {
-  color: #333;
+.login-header .title {
   font-size: 24px;
-  font-weight: 800;
-  margin-bottom: 5px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0 0 8px 0;
 }
 
-.login-admin-header p {
-  color: #666;
+.login-header .subtitle {
   font-size: 14px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* --- Form Styles --- */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .form-group {
-  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .form-group label {
-  display: block;
   font-size: 13px;
   font-weight: 600;
-  color: #555;
-  margin-bottom: 8px;
+  color: #334155;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
+/* Input Wrapper - Container Relative */
 .input-wrapper {
   position: relative;
   display: flex;
   align-items: center;
+  width: 100%;
 }
 
+/* Icon Kiri (User / Lock) */
 .input-icon {
   position: absolute;
-  left: 15px;
-  color: #aaa;
-  font-size: 16px;
-  z-index: 1;
+  left: 16px; /* Posisi icon dari kiri */
+  color: #94A3B8;
+  font-size: 18px;
+  z-index: 10;
+  pointer-events: none; /* Agar klik tembus ke input */
 }
 
+/* Styling Input Field */
 .input-wrapper input {
   width: 100%;
-  padding: 12px 45px 12px 45px;
-  border: 1px solid #ddd;
+  /* Padding: Atas Kanan Bawah Kiri */
+  /* PERBAIKAN: Padding kiri (50px) diperbesar agar tulisan tidak menabrak icon */
+  padding: 12px 45px 12px 50px; 
+  border: 1px solid var(--border-color);
   border-radius: 8px;
-  font-size: 15px;
-  transition: all 0.3s;
-  background-color: #f9f9f9;
+  font-size: 14px;
+  color: var(--text-main);
+  background-color: #F8FAFC;
+  transition: all 0.2s ease;
+  outline: none;
 }
 
 .input-wrapper input:focus {
-  border-color: #FF8A00;
-  background-color: #fff;
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(255, 138, 0, 0.1);
+  border-color: var(--primary-color);
+  background-color: #FFFFFF;
+  box-shadow: 0 0 0 4px var(--input-focus-ring);
 }
 
+.input-wrapper input::placeholder {
+  color: #CBD5E1;
+}
+
+/* Toggle Password Button (Icon Mata di Kanan) */
 .toggle-password {
   position: absolute;
-  right: 15px;
+  right: 16px; /* Posisi dari kanan */
   background: none;
   border: none;
+  color: #94A3B8;
   cursor: pointer;
-  color: #aaa;
-  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+  padding: 0;
+  z-index: 10;
 }
 
-.btn-admin-login {
+.toggle-password:hover {
+  color: var(--text-main);
+}
+
+/* --- Submit Button --- */
+.btn-login-submit {
+  margin-top: 10px;
   width: 100%;
-  padding: 14px;
-  background-color: #FF8A00;
+  padding: 12px;
+  background-color: var(--primary-color);
   color: white;
   border: none;
   border-radius: 8px;
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
   cursor: pointer;
-  transition: background 0.3s, transform 0.2s;
-  margin-top: 10px;
+  transition: background-color 0.2s, transform 0.1s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.btn-admin-login:hover {
-  background-color: #e67e00;
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(255, 138, 0, 0.3);
+.btn-login-submit:hover:not(:disabled) {
+  background-color: var(--primary-hover);
+  transform: translateY(-1px);
 }
 
-.btn-admin-login:disabled {
-  background-color: #ccc;
+.btn-login-submit:disabled {
+  opacity: 0.7;
   cursor: not-allowed;
-  transform: none;
 }
 
-.login-admin-footer {
-  margin-top: 25px;
+/* --- Footer --- */
+.login-footer {
+  margin-top: 24px;
   text-align: center;
-  border-top: 1px solid #eee;
-  padding-top: 15px;
+  border-top: 1px solid var(--border-color);
+  padding-top: 20px;
 }
 
-.back-link {
+.link-back {
   background: none;
   border: none;
-  color: #777;
-  cursor: pointer;
+  color: var(--text-muted);
   font-size: 13px;
-  font-weight: 500;
+  cursor: pointer;
   transition: color 0.2s;
 }
 
-.back-link:hover {
-  color: #FF8A00;
+.link-back:hover {
+  color: var(--primary-color);
   text-decoration: underline;
+}
+
+/* Animation */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .login-admin-card {
+    padding: 30px 20px;
+  }
 }

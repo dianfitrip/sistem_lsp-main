@@ -2,238 +2,244 @@ import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import api from "../../services/api";
 import { 
-  Search, Eye, Trash2, X, Save, 
-  MessageSquare, User, Calendar, Mail, Phone, Loader2, ChevronLeft, ChevronRight
+  Search, Eye, Save, X,
+  MessageSquare, User, Mail, Phone, CheckCircle, Clock, AlertCircle, Loader2
 } from 'lucide-react';
 import './adminstyles/Pengaduan.css'; 
 
 const Pengaduan = () => {
   // --- STATE ---
-  const [data, setData] = useState([]);
+  const [data, setData] = useState([]); 
+  const [filteredData, setFilteredData] = useState([]); 
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Modal State
   const [showModal, setShowModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
-  const [statusEdit, setStatusEdit] = useState(''); // State untuk ubah status di modal
-
-  const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, totalPages: 1 });
+  const [statusEdit, setStatusEdit] = useState(''); 
 
   // --- FETCH DATA ---
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  // Filter Client-Side (Disesuaikan dengan nama kolom database baru)
+  useEffect(() => {
+    if (!data) return;
+    
+    const lowerTerm = searchTerm.toLowerCase();
+    const filtered = data.filter(item => {
+      // PERBAIKAN: Menggunakan 'nama_pengadu' dan 'email_pengadu'
+      const nama = item.nama_pengadu?.toLowerCase() || '';
+      const email = item.email_pengadu?.toLowerCase() || '';
+      const isi = item.isi_pengaduan?.toLowerCase() || '';
+      
+      return nama.includes(lowerTerm) || 
+             email.includes(lowerTerm) || 
+             isi.includes(lowerTerm);
+    });
+    
+    setFilteredData(filtered);
+  }, [searchTerm, data]);
+
   const fetchData = async () => {
     setLoading(true);
     try {
-      const response = await api.get('/admin/pengaduan', {
-        params: { search: searchTerm, page: pagination.page, limit: pagination.limit }
-      });
-      if (response.data.success) {
-        setData(response.data.data.data || []);
-        setPagination(prev => ({
-          ...prev, 
-          total: response.data.data.total, 
-          totalPages: response.data.data.totalPages
-        }));
-      }
+      const response = await api.get('/admin/pengaduan');
+      const result = response.data.data || [];
+      setData(result);
+      setFilteredData(result);
     } catch (error) {
-      console.error(error);
+      console.error("Error fetching pengaduan:", error);
+      setData([]);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, [pagination.page, searchTerm]);
-
   // --- HANDLERS ---
-  const handleStatusChange = async () => {
-    if (!selectedItem) return;
-    
-    try {
-      await api.put(`/admin/pengaduan/${selectedItem.id_pengaduan}/status`, {
-        status_pengaduan: statusEdit
-      });
-      Swal.fire('Sukses', 'Status pengaduan diperbarui', 'success');
-      setShowModal(false);
-      fetchData();
-    } catch (error) {
-      Swal.fire('Error', 'Gagal memperbarui status', 'error');
-    }
-  };
-
-  const handleDelete = async (id) => {
-    const result = await Swal.fire({
-      title: 'Hapus Pengaduan?', 
-      text: "Data akan dihapus permanen.", 
-      icon: 'warning',
-      showCancelButton: true, 
-      confirmButtonText: 'Hapus', 
-      cancelButtonText: 'Batal', 
-      confirmButtonColor: '#d33'
-    });
-
-    if (result.isConfirmed) {
-      try {
-        await api.delete(`/admin/pengaduan/${id}`);
-        Swal.fire('Terhapus!', 'Data telah dihapus.', 'success');
-        fetchData();
-      } catch (error) {
-        Swal.fire('Error', 'Gagal menghapus data', 'error');
-      }
-    }
-  };
-
-  const openDetailModal = (item) => {
+  const handleDetailClick = (item) => {
     setSelectedItem(item);
     setStatusEdit(item.status_pengaduan);
     setShowModal(true);
   };
 
-  // Helper Warna Status
-  const getStatusBadge = (status) => {
-    switch(status) {
-      case 'masuk': return <span className="badge-status masuk">Baru Masuk</span>;
-      case 'tindak_lanjut': return <span className="badge-status proses">Tindak Lanjut</span>;
-      case 'selesai': return <span className="badge-status selesai">Selesai</span>;
-      default: return <span className="badge-status">{status}</span>;
+  const handleStatusChange = async () => {
+    if (!selectedItem) return;
+    try {
+      await api.put(`/admin/pengaduan/${selectedItem.id_pengaduan}/status`, {
+        status_pengaduan: statusEdit
+      });
+      
+      Swal.fire("Berhasil", "Status pengaduan diperbarui", "success");
+      setShowModal(false);
+      fetchData(); 
+    } catch (error) {
+      Swal.fire("Gagal", "Terjadi kesalahan saat memperbarui status", "error");
     }
   };
 
-  // Helper Format Tanggal
-  const formatDate = (dateString) => {
-    const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute:'2-digit' };
-    return new Date(dateString).toLocaleDateString('id-ID', options);
+  // Helper Badge Status
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case 'selesai': 
+        return <span className="status-badge bg-green-100 text-green-800"><CheckCircle size={14}/> Selesai</span>;
+      case 'tindak_lanjut': 
+        return <span className="status-badge bg-blue-100 text-blue-800"><Clock size={14}/> Diproses</span>;
+      default: 
+        return <span className="status-badge bg-yellow-100 text-yellow-800"><AlertCircle size={14}/> Masuk</span>;
+    }
+  };
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '-';
+    return new Date(dateStr).toLocaleDateString('id-ID', {
+      day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+    });
   };
 
   return (
     <div className="pengaduan-container">
-      {/* Header */}
+      {/* HEADER */}
       <div className="header-section">
         <div className="title-box">
           <h2>Layanan Pengaduan</h2>
-          <p>Daftar keluhan dan masukan dari masyarakat/asesi</p>
+          <p>Daftar keluhan dan masukan dari pengguna sistem.</p>
         </div>
       </div>
 
-      {/* Filter */}
-      <div className="filter-section">
-        <div className="search-box">
-          <Search className="search-icon" size={20} />
-          <input 
-            type="text" 
-            placeholder="Cari Nama, Email, atau Isi..." 
-            value={searchTerm} 
-            onChange={(e) => setSearchTerm(e.target.value)} 
-          />
+      {/* CONTENT CARD */}
+      <div className="content-card">
+        
+        {/* TOOLBAR & SEARCH */}
+        <div className="table-toolbar">
+          <div className="toolbar-title">
+            <h4>Daftar Laporan</h4>
+          </div>
+          <div className="toolbar-actions">
+            <div className="search-bar-wrapper">
+              <Search size={18} className="search-icon-inside" />
+              <input 
+                type="text" 
+                className="search-input" 
+                placeholder="Cari Nama / Isi Aduan..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+          </div>
         </div>
-      </div>
 
-      {/* Table */}
-      <div className="table-container">
         {loading ? (
-          <div className="loading-state"><Loader2 className="animate-spin" size={32} /><p>Memuat data...</p></div>
+          <div className="loading-state">
+            <Loader2 className="animate-spin text-orange-500" size={32} />
+            <p>Memuat data pengaduan...</p>
+          </div>
         ) : (
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>No</th>
-                <th>Tanggal</th>
-                <th>Pengirim</th>
-                <th>Sebagai</th>
-                <th>Status</th>
-                <th>Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.length > 0 ? (
-                data.map((item, index) => (
-                  <tr key={item.id_pengaduan}>
-                    <td>{(pagination.page - 1) * pagination.limit + index + 1}</td>
-                    <td>{formatDate(item.tanggal_pengaduan)}</td>
-                    <td>
-                      <div className="flex flex-col">
-                        <span className="font-medium">{item.nama_pengadu}</span>
-                        <span className="text-xs text-gray-500">{item.email_pengadu}</span>
-                      </div>
-                    </td>
-                    <td className="capitalize">{item.sebagai_siapa}</td>
-                    <td>{getStatusBadge(item.status_pengaduan)}</td>
-                    <td>
-                      <div className="action-buttons">
-                        <button className="btn-action view" onClick={() => openDetailModal(item)} title="Lihat & Ubah Status">
+          <div className="table-responsive">
+            <table className="modern-table">
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Tanggal</th>
+                  <th>Pengirim</th>
+                  <th>Isi Singkat</th> {/* Diganti dari Subjek ke Isi Singkat */}
+                  <th>Status</th>
+                  <th className="text-center">Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredData.length > 0 ? (
+                  filteredData.map((item, index) => (
+                    <tr key={item.id_pengaduan}>
+                      <td>{index + 1}</td>
+                      <td>{formatDate(item.tanggal_pengaduan)}</td>
+                      <td>
+                        <div className="user-info">
+                          {/* PERBAIKAN: Mapping data sesuai DB */}
+                          <span className="name">{item.nama_pengadu}</span>
+                          <span className="email text-xs text-gray-500">{item.sebagai_siapa}</span>
+                        </div>
+                      </td>
+                      <td className="subject-col">
+                        {/* PERBAIKAN: Menampilkan cuplikan isi pengaduan karena tidak ada kolom subjek */}
+                        {item.isi_pengaduan}
+                      </td>
+                      <td>{getStatusBadge(item.status_pengaduan)}</td>
+                      <td className="text-center">
+                        <button 
+                          className="btn-icon view" 
+                          onClick={() => handleDetailClick(item)}
+                          title="Lihat Detail"
+                        >
                           <Eye size={18} />
                         </button>
-                        <button className="btn-action delete" onClick={() => handleDelete(item.id_pengaduan)} title="Hapus">
-                          <Trash2 size={18} />
-                        </button>
-                      </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="6" className="empty-state">
+                      <MessageSquare size={40} className="text-gray-300 mb-2"/>
+                      <p>Data tidak ditemukan.</p>
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr><td colSpan="6" className="text-center py-8 text-gray-500">Tidak ada pengaduan masuk</td></tr>
-              )}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 
-      {/* Pagination */}
-      <div className="pagination-section">
-        <div className="pagination-info">Menampilkan {data.length} dari {pagination.total} data</div>
-        <div className="pagination-controls">
-          <button disabled={pagination.page === 1} onClick={() => setPagination(p => ({ ...p, page: p.page - 1 }))}><ChevronLeft size={18}/></button>
-          <span>Hal {pagination.page} / {pagination.totalPages}</span>
-          <button disabled={pagination.page === pagination.totalPages} onClick={() => setPagination(p => ({ ...p, page: p.page + 1 }))}><ChevronRight size={18}/></button>
-        </div>
-      </div>
-
-      {/* Modal Detail & Update Status */}
+      {/* MODAL DETAIL */}
       {showModal && selectedItem && (
-        <div className="modal-overlay">
-          <div className="modal-content large-modal">
-            <div className="modal-header">
+        <div className="modal-backdrop">
+          <div className="modal-card wide-modal">
+            <div className="modal-header-modern">
               <h3>Detail Pengaduan</h3>
-              <button className="btn-close" onClick={() => setShowModal(false)}><X size={20}/></button>
+              <button className="btn-close-modern" onClick={() => setShowModal(false)}><X size={24}/></button>
             </div>
             
-            <div className="modal-body scrollable-body">
-              {/* Info Pengirim */}
-              <div className="detail-card">
-                <h4 className="detail-title"><User size={16}/> Informasi Pengirim</h4>
-                <div className="detail-grid">
-                  <div className="detail-item">
+            <div className="modal-body-scroll">
+              
+              {/* INFO PENGIRIM */}
+              <div className="info-box">
+                <h4 className="box-title"><User size={16}/> Informasi Pengirim</h4>
+                <div className="info-grid">
+                  <div className="info-item">
                     <label>Nama Lengkap</label>
                     <p>{selectedItem.nama_pengadu}</p>
                   </div>
-                  <div className="detail-item">
+                  <div className="info-item">
                     <label>Sebagai</label>
                     <p className="capitalize">{selectedItem.sebagai_siapa}</p>
                   </div>
-                  <div className="detail-item">
+                  <div className="info-item">
                     <label><Mail size={14}/> Email</label>
                     <p>{selectedItem.email_pengadu || '-'}</p>
                   </div>
-                  <div className="detail-item">
-                    <label><Phone size={14}/> No. HP</label>
+                  <div className="info-item">
+                    <label><Phone size={14}/> No HP</label>
                     <p>{selectedItem.no_hp_pengadu || '-'}</p>
                   </div>
                 </div>
               </div>
 
-              {/* Isi Pengaduan */}
-              <div className="detail-card mt-4">
-                <h4 className="detail-title"><MessageSquare size={16}/> Isi Laporan</h4>
-                <div className="detail-item full-width">
-                  <label><Calendar size={14}/> Tanggal Masuk: {formatDate(selectedItem.tanggal_pengaduan)}</label>
-                  <div className="content-box">
-                    {selectedItem.isi_pengaduan}
+              {/* ISI PENGADUAN */}
+              <div className="message-box">
+                <h4 className="box-title"><MessageSquare size={16}/> Isi Laporan</h4>
+                <div className="message-content">
+                  <div className="message-header">
+                    <span className="msg-date"><Clock size={12} className="inline mr-1"/>{formatDate(selectedItem.tanggal_pengaduan)}</span>
                   </div>
+                  <p className="msg-text">{selectedItem.isi_pengaduan}</p>
                 </div>
               </div>
 
-              {/* Update Status Section */}
-              <div className="status-update-section">
-                <label className="font-semibold mb-2 block">Update Status Penanganan:</label>
+              {/* UPDATE STATUS */}
+              <div className="status-action-box">
+                <label>Update Status Penanganan</label>
                 <select 
                   className="status-select"
                   value={statusEdit} 
@@ -247,10 +253,10 @@ const Pengaduan = () => {
 
             </div>
 
-            <div className="modal-footer">
-              <button type="button" className="btn-cancel" onClick={() => setShowModal(false)}>Tutup</button>
-              <button type="button" className="btn-save" onClick={handleStatusChange}>
-                <Save size={16}/> Simpan Perubahan
+            <div className="modal-footer-modern">
+              <button type="button" className="btn-secondary" onClick={() => setShowModal(false)}>Tutup</button>
+              <button type="button" className="btn-primary" onClick={handleStatusChange}>
+                <Save size={16} className="mr-2"/> Simpan Status
               </button>
             </div>
           </div>
